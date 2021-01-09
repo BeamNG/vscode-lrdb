@@ -1,129 +1,260 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Lua Debug Adapter breakpoint should stop on breakpoint 1`] = `
-Array [
-  Object {
-    "command": "configurationDone",
-    "request_seq": 4,
-    "seq": 5,
-    "success": true,
-    "type": "response",
+exports[`Lua Debug Adapter global check global values 1`] = `
+Object {
+  "body": Object {
+    "variables": Array [
+      Object {
+        "name": "_G",
+        "type": "object",
+        "value": "{\\"_G\\":{\\"table\\":\\"0x50b3c8\\"},\\"_VERSION\\":\\"Lua 5.3\\",\\"assert\\":\\"function: 0x67\\",\\"collectgarbage\\":\\"function: 0x68\\",\\"coroutine\\":{\\"table\\":\\"0x50ca50\\"},\\"debug\\":{\\"table\\":\\"0x50d6c0\\"},\\"dofile\\":\\"function: 0x69\\",\\"error\\":\\"function: 0x6a\\",\\"getmetatable\\":\\"function: 0x6b\\",\\"global_value\\":1,\\"io\\":{\\"table\\":\\"0x50cee8\\"},\\"ipairs\\":\\"function: 0x6c\\",\\"load\\":\\"function: 0x6e\\",\\"loadfile\\":\\"function: 0x6d\\",\\"math\\":{\\"table\\":\\"0x50e2c0\\"},\\"next\\":\\"function: 0x65\\",\\"os\\":{\\"table\\":\\"0x50cc60\\"},\\"package\\":{\\"table\\":\\"0x50b318\\"},\\"pairs\\":\\"function: 0x6f\\",\\"pcall\\":\\"function: 0x70\\",\\"print\\":\\"function: 0x71\\",\\"rawequal\\":\\"function: 0x72\\",\\"rawget\\":\\"function: 0x74\\",\\"rawlen\\":\\"function: 0x73\\",\\"rawset\\":\\"function: 0x75\\",\\"require\\":\\"function: 0x50bfd8\\",\\"select\\":\\"function: 0x76\\",\\"setmetatable\\":\\"function: 0x77\\",\\"string\\":{\\"table\\":\\"0x50b470\\"},\\"table\\":{\\"table\\":\\"0x50ca28\\"},\\"tonumber\\":\\"function: 0x78\\",\\"tostring\\":\\"function: 0x79\\",\\"type\\":\\"function: 0x7a\\",\\"utf8\\":{\\"table\\":\\"0x50e9f0\\"},\\"xpcall\\":\\"function: 0x7b\\"}",
+        "variablesReference": 1003,
+      },
+      Object {
+        "name": "_VERSION",
+        "type": "string",
+        "value": "\\"Lua 5.3\\"",
+      },
+      Object {
+        "name": "assert",
+        "type": "string",
+        "value": "\\"function: 0x67\\"",
+      },
+      Object {
+        "name": "collectgarbage",
+        "type": "string",
+        "value": "\\"function: 0x68\\"",
+      },
+      Object {
+        "name": "coroutine",
+        "type": "object",
+        "value": "{\\"create\\":\\"function: 0x7d\\",\\"isyieldable\\":\\"function: 0x83\\",\\"resume\\":\\"function: 0x7e\\",\\"running\\":\\"function: 0x7f\\",\\"status\\":\\"function: 0x80\\",\\"wrap\\":\\"function: 0x81\\",\\"yield\\":\\"function: 0x82\\"}",
+        "variablesReference": 1004,
+      },
+      Object {
+        "name": "debug",
+        "type": "object",
+        "value": "{\\"debug\\":\\"function: 0x85\\",\\"gethook\\":\\"function: 0x87\\",\\"getinfo\\":\\"function: 0x88\\",\\"getlocal\\":\\"function: 0x89\\",\\"getmetatable\\":\\"function: 0x8b\\",\\"getregistry\\":\\"function: 0x8a\\",\\"getupvalue\\":\\"function: 0x8c\\",\\"getuservalue\\":\\"function: 0x86\\",\\"sethook\\":\\"function: 0x90\\",\\"setlocal\\":\\"function: 0x91\\",\\"setmetatable\\":\\"function: 0x92\\",\\"setupvalue\\":\\"function: 0x93\\",\\"setuservalue\\":\\"function: 0x8f\\",\\"traceback\\":\\"function: 0x94\\",\\"upvalueid\\":\\"function: 0x8e\\",\\"upvaluejoin\\":\\"function: 0x8d\\"}",
+        "variablesReference": 1005,
+      },
+      Object {
+        "name": "dofile",
+        "type": "string",
+        "value": "\\"function: 0x69\\"",
+      },
+      Object {
+        "name": "error",
+        "type": "string",
+        "value": "\\"function: 0x6a\\"",
+      },
+      Object {
+        "name": "getmetatable",
+        "type": "string",
+        "value": "\\"function: 0x6b\\"",
+      },
+      Object {
+        "name": "global_value",
+        "type": "number",
+        "value": "1",
+      },
+      Object {
+        "name": "io",
+        "type": "object",
+        "value": "{\\"close\\":\\"function: 0xa3\\",\\"flush\\":\\"function: 0xa4\\",\\"input\\":\\"function: 0xa5\\",\\"lines\\":\\"function: 0xa6\\",\\"open\\":\\"function: 0xa7\\",\\"output\\":\\"function: 0xa8\\",\\"popen\\":\\"function: 0xa9\\",\\"read\\":\\"function: 0xaa\\",\\"stderr\\":\\"file (0x9220)\\",\\"stdin\\":\\"file (0x92b0)\\",\\"stdout\\":\\"file (0x9188)\\",\\"tmpfile\\":\\"function: 0xab\\",\\"type\\":\\"function: 0xac\\",\\"write\\":\\"function: 0xad\\"}",
+        "variablesReference": 1006,
+      },
+      Object {
+        "name": "ipairs",
+        "type": "string",
+        "value": "\\"function: 0x6c\\"",
+      },
+      Object {
+        "name": "load",
+        "type": "string",
+        "value": "\\"function: 0x6e\\"",
+      },
+      Object {
+        "name": "loadfile",
+        "type": "string",
+        "value": "\\"function: 0x6d\\"",
+      },
+      Object {
+        "name": "math",
+        "type": "object",
+        "value": "{\\"abs\\":\\"function: 0xb6\\",\\"acos\\":\\"function: 0xb7\\",\\"asin\\":\\"function: 0xb8\\",\\"atan\\":\\"function: 0xb9\\",\\"ceil\\":\\"function: 0xba\\",\\"cos\\":\\"function: 0xbb\\",\\"deg\\":\\"function: 0xbc\\",\\"exp\\":\\"function: 0xbd\\",\\"floor\\":\\"function: 0xbf\\",\\"fmod\\":\\"function: 0xc0\\",\\"huge\\":\\"Infinity\\",\\"log\\":\\"function: 0xc2\\",\\"max\\":\\"function: 0xc3\\",\\"maxinteger\\":9223372036854776000,\\"min\\":\\"function: 0xc4\\",\\"mininteger\\":-9223372036854776000,\\"modf\\":\\"function: 0xc5\\",\\"pi\\":3.141592653589793,\\"rad\\":\\"function: 0xc6\\",\\"random\\":\\"function: 0xc7\\",\\"randomseed\\":\\"function: 0xc8\\",\\"sin\\":\\"function: 0xc9\\",\\"sqrt\\":\\"function: 0xca\\",\\"tan\\":\\"function: 0xcb\\",\\"tointeger\\":\\"function: 0xbe\\",\\"type\\":\\"function: 0xcc\\",\\"ult\\":\\"function: 0xc1\\"}",
+        "variablesReference": 1007,
+      },
+      Object {
+        "name": "next",
+        "type": "string",
+        "value": "\\"function: 0x65\\"",
+      },
+      Object {
+        "name": "os",
+        "type": "object",
+        "value": "{\\"clock\\":\\"function: 0xd5\\",\\"date\\":\\"function: 0xd6\\",\\"difftime\\":\\"function: 0xd7\\",\\"execute\\":\\"function: 0xd8\\",\\"exit\\":\\"function: 0xd9\\",\\"getenv\\":\\"function: 0xda\\",\\"remove\\":\\"function: 0xdb\\",\\"rename\\":\\"function: 0xdc\\",\\"setlocale\\":\\"function: 0xdd\\",\\"time\\":\\"function: 0xde\\",\\"tmpname\\":\\"function: 0xdf\\"}",
+        "variablesReference": 1008,
+      },
+      Object {
+        "name": "package",
+        "type": "object",
+        "value": "{\\"config\\":\\"/\\\\n;\\\\n?\\\\n!\\\\n-\\\\n\\",\\"cpath\\":\\"/usr/local/lib/lua/5.3/?.so;/usr/local/lib/lua/5.3/loadall.so;./?.so\\",\\"loaded\\":{\\"table\\":\\"0x50bbb8\\"},\\"loadlib\\":\\"function: 0xd2\\",\\"path\\":\\"/usr/local/share/lua/5.3/?.lua;/usr/local/share/lua/5.3/?/init.lua;/usr/local/lib/lua/5.3/?.lua;/usr/local/lib/lua/5.3/?/init.lua;./?.lua;./?/init.lua\\",\\"preload\\":{\\"table\\":\\"0x50c958\\"},\\"searchers\\":{\\"table\\":\\"0x50c628\\"},\\"searchpath\\":\\"function: 0xd3\\"}",
+        "variablesReference": 1009,
+      },
+      Object {
+        "name": "pairs",
+        "type": "string",
+        "value": "\\"function: 0x6f\\"",
+      },
+      Object {
+        "name": "pcall",
+        "type": "string",
+        "value": "\\"function: 0x70\\"",
+      },
+      Object {
+        "name": "print",
+        "type": "string",
+        "value": "\\"function: 0x71\\"",
+      },
+      Object {
+        "name": "rawequal",
+        "type": "string",
+        "value": "\\"function: 0x72\\"",
+      },
+      Object {
+        "name": "rawget",
+        "type": "string",
+        "value": "\\"function: 0x74\\"",
+      },
+      Object {
+        "name": "rawlen",
+        "type": "string",
+        "value": "\\"function: 0x73\\"",
+      },
+      Object {
+        "name": "rawset",
+        "type": "string",
+        "value": "\\"function: 0x75\\"",
+      },
+      Object {
+        "name": "require",
+        "type": "string",
+        "value": "\\"function: 0x50bfd8\\"",
+      },
+      Object {
+        "name": "select",
+        "type": "string",
+        "value": "\\"function: 0x76\\"",
+      },
+      Object {
+        "name": "setmetatable",
+        "type": "string",
+        "value": "\\"function: 0x77\\"",
+      },
+      Object {
+        "name": "string",
+        "type": "object",
+        "value": "{\\"byte\\":\\"function: 0xe4\\",\\"char\\":\\"function: 0xe5\\",\\"dump\\":\\"function: 0xe6\\",\\"find\\":\\"function: 0xe7\\",\\"format\\":\\"function: 0xe8\\",\\"gmatch\\":\\"function: 0xe9\\",\\"gsub\\":\\"function: 0xea\\",\\"len\\":\\"function: 0xeb\\",\\"lower\\":\\"function: 0xec\\",\\"match\\":\\"function: 0xed\\",\\"pack\\":\\"function: 0xf2\\",\\"packsize\\":\\"function: 0xf3\\",\\"rep\\":\\"function: 0xee\\",\\"reverse\\":\\"function: 0xef\\",\\"sub\\":\\"function: 0xf0\\",\\"unpack\\":\\"function: 0xf4\\",\\"upper\\":\\"function: 0xf1\\"}",
+        "variablesReference": 1010,
+      },
+      Object {
+        "name": "table",
+        "type": "object",
+        "value": "{\\"concat\\":\\"function: 0xf5\\",\\"insert\\":\\"function: 0xf6\\",\\"move\\":\\"function: 0xfa\\",\\"pack\\":\\"function: 0xf7\\",\\"remove\\":\\"function: 0xf9\\",\\"sort\\":\\"function: 0xfb\\",\\"unpack\\":\\"function: 0xf8\\"}",
+        "variablesReference": 1011,
+      },
+      Object {
+        "name": "tonumber",
+        "type": "string",
+        "value": "\\"function: 0x78\\"",
+      },
+      Object {
+        "name": "tostring",
+        "type": "string",
+        "value": "\\"function: 0x79\\"",
+      },
+      Object {
+        "name": "type",
+        "type": "string",
+        "value": "\\"function: 0x7a\\"",
+      },
+      Object {
+        "name": "utf8",
+        "type": "object",
+        "value": "{\\"char\\":\\"function: 0xff\\",\\"charpattern\\":\\"[\\",\\"codepoint\\":\\"function: 0xfe\\",\\"codes\\":\\"function: 0x101\\",\\"len\\":\\"function: 0x100\\",\\"offset\\":\\"function: 0xfd\\"}",
+        "variablesReference": 1012,
+      },
+      Object {
+        "name": "xpcall",
+        "type": "string",
+        "value": "\\"function: 0x7b\\"",
+      },
+    ],
   },
-  Object {
-    "command": "launch",
-    "request_seq": 2,
-    "seq": 2,
-    "success": true,
-    "type": "response",
-  },
-  Object {
-    "body": Object {
-      "stackFrames": Array [
-        Object {
-          "column": 0,
-          "id": 0,
-          "line": 5,
-          "name": "testfn",
-          "source": Object {
-            "name": "test/lua/loop_test.lua",
-            "path": "/Users/masataka/projects/vscode-lrdb/test/lua/loop_test.lua",
-            "sourceReference": 0,
-          },
-        },
-        Object {
-          "column": 0,
-          "id": 1,
-          "line": 11,
-          "name": "main",
-          "source": Object {
-            "name": "test/lua/loop_test.lua",
-            "path": "/Users/masataka/projects/vscode-lrdb/test/lua/loop_test.lua",
-            "sourceReference": 0,
-          },
-        },
-      ],
-      "totalFrames": 2,
-    },
-    "command": "stackTrace",
-    "request_seq": 5,
-    "seq": 8,
-    "success": true,
-    "type": "response",
-  },
-]
+  "command": "variables",
+  "request_seq": 7,
+  "seq": 10,
+  "success": true,
+  "type": "response",
+}
 `;
 
-exports[`Lua Debug Adapter launch should run program to the end 1`] = `
-Array [
-  Object {
-    "command": "launch",
-    "request_seq": 2,
-    "seq": 2,
-    "success": true,
-    "type": "response",
+exports[`Lua Debug Adapter local check local_values 1`] = `
+Object {
+  "body": Object {
+    "variables": Array [
+      Object {
+        "name": "local_value1",
+        "type": "number",
+        "value": "1",
+      },
+      Object {
+        "name": "local_value2",
+        "type": "string",
+        "value": "\\"abc\\"",
+      },
+      Object {
+        "name": "local_value3",
+        "type": "number",
+        "value": "1",
+      },
+      Object {
+        "name": "local_value4",
+        "type": "object",
+        "value": "[4234.3]",
+        "variablesReference": 1003,
+      },
+    ],
   },
-  Object {
-    "command": "configurationDone",
-    "request_seq": 3,
-    "seq": 4,
-    "success": true,
-    "type": "response",
-  },
-  Object {
-    "event": "terminated",
-    "seq": 7,
-    "type": "event",
-  },
-]
+  "command": "variables",
+  "request_seq": 7,
+  "seq": 10,
+  "success": true,
+  "type": "response",
+}
 `;
 
-exports[`Lua Debug Adapter launch should stop on entry 1`] = `
-Array [
-  Object {
-    "command": "launch",
-    "request_seq": 2,
-    "seq": 2,
-    "success": true,
-    "type": "response",
+exports[`Lua Debug Adapter upvalues check upvalues 1`] = `
+Object {
+  "body": Object {
+    "variables": Array [
+      Object {
+        "name": "a",
+        "type": "number",
+        "value": "1",
+      },
+      Object {
+        "name": "t",
+        "type": "object",
+        "value": "[{\\"table\\":\\"0x50fb10\\"},5,6]",
+        "variablesReference": 1003,
+      },
+    ],
   },
-  Object {
-    "command": "configurationDone",
-    "request_seq": 3,
-    "seq": 4,
-    "success": true,
-    "type": "response",
-  },
-  Object {
-    "body": Object {
-      "reason": "entry",
-      "threadId": 1,
-    },
-    "event": "stopped",
-    "seq": 5,
-    "type": "event",
-  },
-  Object {
-    "body": Object {
-      "stackFrames": Array [
-        Object {
-          "column": 0,
-          "id": 0,
-          "line": 1,
-          "name": "main",
-          "source": Object {
-            "name": "test/lua/loop_test.lua",
-            "path": "/Users/masataka/projects/vscode-lrdb/test/lua/loop_test.lua",
-            "sourceReference": 0,
-          },
-        },
-      ],
-      "totalFrames": 1,
-    },
-    "command": "stackTrace",
-    "request_seq": 4,
-    "seq": 6,
-    "success": true,
-    "type": "response",
-  },
-]
+  "command": "variables",
+  "request_seq": 7,
+  "seq": 10,
+  "success": true,
+  "type": "response",
+}
 `;
