@@ -13,20 +13,25 @@ import {
   Breakpoint,
 } from 'vscode-debugadapter'
 import { DebugProtocol } from 'vscode-debugprotocol'
-import { readFileSync, existsSync } from 'fs'
+import { readFileSync } from 'fs'
 import { spawn, ChildProcess } from 'child_process'
 import * as path from 'path'
 import { LuaWasm, LRDBAdapter, LRDBClient } from 'lrdb-debuggable-lua'
+import {
+  GetLocalVariableRequest,
+  GetGlobalRequest,
+  GetUpvaluesRequest,
+  EvalRequest,
+} from 'lrdb-debuggable-lua/dist/Client'
 
 export interface LaunchRequestArguments
   extends DebugProtocol.LaunchRequestArguments {
   program: string
   args: string[]
   cwd: string
-
   useInternalLua?: boolean
   port: number
-  sourceRoot?: string | string[]
+  sourceRoot?: string
   stopOnEntry?: boolean
 }
 
@@ -34,26 +39,25 @@ export interface AttachRequestArguments
   extends DebugProtocol.AttachRequestArguments {
   host: string
   port: number
-  sourceRoot: string | string[]
-
+  sourceRoot: string
   stopOnEntry?: boolean
 }
 
 type GetLocalVariableParam = {
   type: 'get_local_variable'
-  params: Parameters<LRDBClient.Client['getLocalVariable']>[0]
+  params: GetLocalVariableRequest['params']
 }
 type GetGlobalParam = {
   type: 'get_global'
-  params: Parameters<LRDBClient.Client['getGlobal']>[0]
+  params: GetGlobalRequest['params']
 }
 type GetUpvaluesParam = {
   type: 'get_upvalues'
-  params: Parameters<LRDBClient.Client['getUpvalues']>[0]
+  params: GetUpvaluesRequest['params']
 }
 type EvalParam = {
   type: 'eval'
-  params: Parameters<LRDBClient.Client['eval']>[0]
+  params: EvalRequest['params']
 }
 
 type VariableReference =
@@ -62,24 +66,23 @@ type VariableReference =
   | GetUpvaluesParam
   | EvalParam
 
-
-  function stringify(value: unknown): string {
-    if (value == null) {
-      return 'nil'
-    } else if (value == undefined) {
-      return 'none'
-    } else {
-      return JSON.stringify(value)
-    }
+function stringify(value: unknown): string {
+  if (value == null) {
+    return 'nil'
+  } else if (value == undefined) {
+    return 'none'
+  } else {
+    return JSON.stringify(value)
   }
+}
 
 export class LuaDebugSession extends DebugSession {
   // Lua
   private static THREAD_ID = 1
 
-  private _debug_server_process: ChildProcess
+  private _debug_server_process?: ChildProcess
 
-  private _debug_client: LRDBClient.Client
+  private _debug_client?: LRDBClient.Client
 
   // maps from sourceFile to array of Breakpoints
   private _breakPoints = new Map<string, DebugProtocol.Breakpoint[]>()
@@ -90,7 +93,7 @@ export class LuaDebugSession extends DebugSession {
 
   private _sourceHandles = new Handles<string>()
 
-  private _stopOnEntry: boolean
+  private _stopOnEntry?: boolean
 
   /**
    * Creates a new debug adapter that is used for one debug session.
@@ -110,65 +113,56 @@ export class LuaDebugSession extends DebugSession {
    */
   protected initializeRequest(
     response: DebugProtocol.InitializeResponse,
-   // args: DebugProtocol.InitializeRequestArguments
+    _args: DebugProtocol.InitializeRequestArguments
   ): void {
     if (this._debug_server_process) {
       this._debug_server_process.kill()
       delete this._debug_server_process
     }
+
     if (this._debug_client) {
       this._debug_client.end()
       delete this._debug_client
     }
-    // This debug adapter implements the configurationDoneRequest.
-    response.body.supportsConfigurationDoneRequest = true
 
-    response.body.supportsConditionalBreakpoints = true
+    if (response.body) {
+      // This debug adapter implements the configurationDoneRequest.
+      response.body.supportsConfigurationDoneRequest = true
 
-    response.body.supportsHitConditionalBreakpoints = true
+      response.body.supportsConditionalBreakpoints = true
 
-    // make VS Code to use 'evaluate' when hovering over source
-    response.body.supportsEvaluateForHovers = true
+      response.body.supportsHitConditionalBreakpoints = true
+
+      // make VS Code to use 'evaluate' when hovering over source
+      response.body.supportsEvaluateForHovers = true
+    }
 
     this.sendResponse(response)
   }
 
-  private setupSourceEnv(sourceRoot: string[]) {
+  private setupSourceEnv(sourceRoot: string) {
     this.convertClientLineToDebugger = (line: number): number => {
       return line
     }
+
     this.convertDebuggerLineToClient = (line: number): number => {
       return line
     }
 
     this.convertClientPathToDebugger = (clientPath: string): string => {
-      for (let index = 0; index < sourceRoot.length; index++) {
-        const root = sourceRoot[index]
-        const resolvedRoot = path.resolve(root)
-        const resolvedClient = path.resolve(clientPath)
-        if (resolvedClient.startsWith(resolvedRoot)) {
-          return path.relative(resolvedRoot, resolvedClient)
-        }
-      }
-      return path.relative(sourceRoot[0], clientPath)
+      return path.relative(sourceRoot, clientPath)
     }
+
     this.convertDebuggerPathToClient = (debuggerPath: string): string => {
       if (!debuggerPath.startsWith('@')) {
         return ''
       }
+
       const filename: string = debuggerPath.substr(1)
       if (path.isAbsolute(filename)) {
         return filename
       } else {
-        if (sourceRoot.length > 1) {
-          for (let index = 0; index < sourceRoot.length; index++) {
-            const absolutePath = path.join(sourceRoot[index], filename)
-            if (existsSync(absolutePath)) {
-              return absolutePath
-            }
-          }
-        }
-        return path.join(sourceRoot[0], filename)
+        return path.join(sourceRoot, filename)
       }
     }
   }
@@ -179,11 +173,7 @@ export class LuaDebugSession extends DebugSession {
   ): void {
     this._stopOnEntry = args.stopOnEntry
     const cwd = args.cwd ? args.cwd : process.cwd()
-    let sourceRoot = args.sourceRoot ? args.sourceRoot : cwd
-
-    if (typeof sourceRoot === 'string') {
-      sourceRoot = [sourceRoot]
-    }
+    const sourceRoot = args.sourceRoot ? args.sourceRoot : cwd
 
     this.setupSourceEnv(sourceRoot)
     const programArg = args.args ? args.args : []
@@ -216,22 +206,23 @@ export class LuaDebugSession extends DebugSession {
     this._debug_client.onNotify.on((event) => {
       this.handleServerEvents(event)
     })
-    ///    this._debug_client.on_close = () => {};
-    //    this._debug_client.on_error = (e: any) => {};
 
     this._debug_client.onOpen.on(() => {
       this.sendEvent(new InitializedEvent())
     })
 
-    this._debug_server_process.stdout.on('data', (data) => {
+    this._debug_server_process.stdout?.on('data', (data) => {
       this.sendEvent(new OutputEvent(data.toString(), 'stdout'))
     })
-    this._debug_server_process.stderr.on('data', (data) => {
+
+    this._debug_server_process.stderr?.on('data', (data) => {
       this.sendEvent(new OutputEvent(data.toString(), 'stderr'))
     })
+
     this._debug_server_process.on('error', (msg: string) => {
       this.sendEvent(new OutputEvent(msg, 'error'))
     })
+
     this._debug_server_process.on('close', (code: number) => {
       this.sendEvent(new OutputEvent(`exit status: ${code}\n`))
       this.sendEvent(new TerminatedEvent())
@@ -246,11 +237,7 @@ export class LuaDebugSession extends DebugSession {
   ): void {
     const args = oargs as AttachRequestArguments
     this._stopOnEntry = args.stopOnEntry
-    let sourceRoot = args.sourceRoot
-
-    if (typeof sourceRoot === 'string') {
-      sourceRoot = [sourceRoot]
-    }
+    const sourceRoot = args.sourceRoot
 
     this.setupSourceEnv(sourceRoot)
 
@@ -261,12 +248,15 @@ export class LuaDebugSession extends DebugSession {
     this._debug_client.onNotify.on((event) => {
       this.handleServerEvents(event)
     })
+
     this._debug_client.onClose.on(() => {
       this.sendEvent(new TerminatedEvent())
     })
+
     this._debug_client.onOpen.on(() => {
       this.sendEvent(new InitializedEvent())
     })
+
     this.sendResponse(response)
   }
 
@@ -281,6 +271,11 @@ export class LuaDebugSession extends DebugSession {
     args: DebugProtocol.SetBreakpointsArguments
   ): void {
     const path = args.source.path
+    if (!this._debug_client || !path) {
+      response.success = false
+      this.sendResponse(response)
+      return
+    }
 
     // read file contents into array for direct access
     const lines = readFileSync(path).toString().split('\n')
@@ -290,47 +285,48 @@ export class LuaDebugSession extends DebugSession {
     const debuggerFilePath = this.convertClientPathToDebugger(path)
 
     this._debug_client.clearBreakPoints({ file: debuggerFilePath })
-    // verify breakpoint locations
-    for (const souceBreakpoint of args.breakpoints) {
-      let l = this.convertClientLineToDebugger(souceBreakpoint.line)
-      let verified = false
-      while (l <= lines.length) {
-        const line = lines[l - 1].trim()
-        // if a line is empty or starts with '--' we don't allow to set a breakpoint but move the breakpoint down
-        if (line.length == 0 || line.startsWith('--')) {
-          l++
-        } else {
-          verified = true // this breakpoint has been validated
-          break
+
+    if (args.breakpoints) {
+      // verify breakpoint locations
+      for (const souceBreakpoint of args.breakpoints) {
+        let l = this.convertClientLineToDebugger(souceBreakpoint.line)
+        let verified = false
+        while (l <= lines.length) {
+          const line = lines[l - 1].trim()
+          // if a line is empty or starts with '--' we don't allow to set a breakpoint but move the breakpoint down
+          if (line.length == 0 || line.startsWith('--')) {
+            l++
+          } else {
+            verified = true // this breakpoint has been validated
+            break
+          }
         }
-      }
-      const bp = <DebugProtocol.Breakpoint>(
-        new Breakpoint(verified, this.convertDebuggerLineToClient(l))
-      )
-      bp.id = this._breakPointID++
-      breakpoints.push(bp)
-      if (verified) {
-        const sendbreakpoint = {
-          line: l,
-          file: debuggerFilePath,
-          condition: undefined,
-          hit_condition: undefined,
+
+        const bp: DebugProtocol.Breakpoint = new Breakpoint(
+          verified,
+          this.convertDebuggerLineToClient(l)
+        )
+        bp.id = this._breakPointID++
+        breakpoints.push(bp)
+        if (verified) {
+          const sendbreakpoint = {
+            line: l,
+            file: debuggerFilePath,
+            condition: souceBreakpoint.condition,
+            hit_condition: souceBreakpoint.hitCondition,
+          }
+          this._debug_client.addBreakPoint(sendbreakpoint)
         }
-        if (souceBreakpoint.condition) {
-          sendbreakpoint.condition = souceBreakpoint.condition
-        }
-        if (souceBreakpoint.hitCondition) {
-          sendbreakpoint.hit_condition = souceBreakpoint.hitCondition
-        }
-        this._debug_client.addBreakPoint(sendbreakpoint)
       }
     }
+
     this._breakPoints.set(path, breakpoints)
 
     // send back the actual breakpoint positions
     response.body = {
       breakpoints: breakpoints,
     }
+
     this.sendResponse(response)
   }
 
@@ -339,6 +335,7 @@ export class LuaDebugSession extends DebugSession {
     response.body = {
       threads: [new Thread(LuaDebugSession.THREAD_ID, 'thread 1')],
     }
+
     this.sendResponse(response)
   }
 
@@ -349,6 +346,12 @@ export class LuaDebugSession extends DebugSession {
     response: DebugProtocol.StackTraceResponse,
     args: DebugProtocol.StackTraceArguments
   ): void {
+    if (!this._debug_client) {
+      response.success = false
+      this.sendResponse(response)
+      return
+    }
+
     this._debug_client.getStackTrace().then((res) => {
       if (res.result) {
         const startFrame =
@@ -366,6 +369,7 @@ export class LuaDebugSession extends DebugSession {
           if (!frame.file.startsWith('@')) {
             source.sourceReference = this._sourceHandles.create(frame.file)
           }
+
           frames.push(
             new StackFrame(
               i,
@@ -376,6 +380,7 @@ export class LuaDebugSession extends DebugSession {
             )
           )
         }
+
         response.body = {
           stackFrames: frames,
           totalFrames: res.result.length,
@@ -384,6 +389,7 @@ export class LuaDebugSession extends DebugSession {
         response.success = false
         response.message = 'unknown error'
       }
+
       this.sendResponse(response)
     })
   }
@@ -426,6 +432,7 @@ export class LuaDebugSession extends DebugSession {
     response.body = {
       scopes: scopes,
     }
+
     this.sendResponse(response)
   }
 
@@ -433,8 +440,13 @@ export class LuaDebugSession extends DebugSession {
     response: DebugProtocol.VariablesResponse,
     args: DebugProtocol.VariablesArguments
   ): void {
-    const parent = this._variableHandles.get(args.variablesReference)
+    if (!this._debug_client) {
+      response.success = false
+      this.sendResponse(response)
+      return
+    }
 
+    const parent = this._variableHandles.get(args.variablesReference)
     if (parent != null) {
       const res = (() => {
         switch (parent.type) {
@@ -451,9 +463,10 @@ export class LuaDebugSession extends DebugSession {
               .getUpvalues(parent.params)
               .then((res) => res.result)
           case 'eval':
-            return this._debug_client
-              .eval(parent.params)
-              .then((res) => res.result[0])
+            return this._debug_client.eval(parent.params).then((res) => {
+              const results = res.result as [any]
+              return results[0]
+            })
           default:
             return Promise.reject(Error('invalid'))
         }
@@ -461,7 +474,7 @@ export class LuaDebugSession extends DebugSession {
 
       res
         .then((result) =>
-          this.variablesRequestResponce(response, result, parent)
+          this.variablesRequestResponse(response, result, parent)
         )
         .catch((err) => {
           response.success = false
@@ -474,7 +487,7 @@ export class LuaDebugSession extends DebugSession {
     }
   }
 
-  private variablesRequestResponce(
+  private variablesRequestResponse(
     response: DebugProtocol.VariablesResponse,
     variablesData: unknown,
     parent: VariableReference
@@ -506,12 +519,14 @@ export class LuaDebugSession extends DebugSession {
         }
       }
     }
+
     const variables: DebugProtocol.Variable[] = []
     if (variablesData instanceof Array) {
-      variablesData.forEach((v,i) => {
+      variablesData.forEach((v, i) => {
         const typename = typeof v
         const k = i + 1
-        const varRef = (typename == 'object') ? this._variableHandles.create(evalParam(k)) : undefined
+        const varRef =
+          typename === 'object' ? this._variableHandles.create(evalParam(k)) : 0
         variables.push({
           name: `${k}`,
           type: typename,
@@ -520,59 +535,64 @@ export class LuaDebugSession extends DebugSession {
         })
       })
     } else if (typeof variablesData === 'object') {
-      for (const k in variablesData) {
-        const typename = typeof variablesData[k]
-        const varRef =  (typename == 'object') ? this._variableHandles.create(evalParam(k)) : undefined
+      const varData = variablesData as Record<string, any>
+      for (const k in varData) {
+        const typename = typeof varData[k]
+        const varRef =
+          typename === 'object' ? this._variableHandles.create(evalParam(k)) : 0
         variables.push({
           name: k,
           type: typename,
-          value: stringify(variablesData[k]),
+          value: stringify(varData[k]),
           variablesReference: varRef,
         })
       }
     }
+
     response.body = {
       variables: variables,
     }
+
     this.sendResponse(response)
   }
 
   protected continueRequest(
     response: DebugProtocol.ContinueResponse,
- //   args: DebugProtocol.ContinueArguments
+    _args: DebugProtocol.ContinueArguments
   ): void {
-    this._debug_client.continue()
+    this._debug_client?.continue()
     this.sendResponse(response)
   }
 
   protected nextRequest(
     response: DebugProtocol.NextResponse,
- //   args: DebugProtocol.NextArguments
+    _args: DebugProtocol.NextArguments
   ): void {
-    this._debug_client.step()
+    this._debug_client?.step()
     this.sendResponse(response)
   }
 
   protected stepInRequest(
     response: DebugProtocol.StepInResponse,
-  //  args: DebugProtocol.StepInArguments
+    _args: DebugProtocol.StepInArguments
   ): void {
-    this._debug_client.stepIn()
+    this._debug_client?.stepIn()
     this.sendResponse(response)
   }
 
   protected stepOutRequest(
     response: DebugProtocol.StepOutResponse,
-   // args: DebugProtocol.StepOutArguments
+    _args: DebugProtocol.StepOutArguments
   ): void {
-    this._debug_client.stepOut()
+    this._debug_client?.stepOut()
     this.sendResponse(response)
   }
+
   protected pauseRequest(
     response: DebugProtocol.PauseResponse,
-  //  args: DebugProtocol.PauseArguments
+    _args: DebugProtocol.PauseArguments
   ): void {
-    this._debug_client.pause()
+    this._debug_client?.pause()
     this.sendResponse(response)
   }
 
@@ -586,21 +606,24 @@ export class LuaDebugSession extends DebugSession {
         content: id,
       }
     }
+
     this.sendResponse(response)
   }
 
   protected disconnectRequest(
     response: DebugProtocol.DisconnectResponse,
-  //  args: DebugProtocol.DisconnectArguments
+    _args: DebugProtocol.DisconnectArguments
   ): void {
     if (this._debug_server_process) {
       this._debug_server_process.kill()
       delete this._debug_server_process
     }
+
     if (this._debug_client) {
       this._debug_client.end()
       delete this._debug_client
     }
+
     this.sendResponse(response)
   }
 
@@ -613,12 +636,12 @@ export class LuaDebugSession extends DebugSession {
       this.sendResponse(response)
       return
     }
-    //		if (args.context == "watch" || args.context == "hover" || args.context == "repl") {
+
     const chunk = args.expression
-    const requestParam = { stack_no: args.frameId, chunk: chunk, depth: 0 }
+    const requestParam: EvalRequest['params'] = { stack_no: args.frameId as number, chunk: chunk, depth: 0 }
     this._debug_client.eval(requestParam).then((res) => {
       if (res.result instanceof Array) {
-        const ret = res.result.map(v => stringify(v)).join('	')
+        const ret = res.result.map((v) => stringify(v)).join('\t')
         let varRef = 0
         if (res.result.length == 1) {
           const refobj = res.result[0]
@@ -630,6 +653,7 @@ export class LuaDebugSession extends DebugSession {
             })
           }
         }
+
         response.body = {
           result: ret,
           variablesReference: varRef,
@@ -639,8 +663,10 @@ export class LuaDebugSession extends DebugSession {
           result: '',
           variablesReference: 0,
         }
+
         response.success = false
       }
+
       this.sendResponse(response)
     })
   }
@@ -648,7 +674,7 @@ export class LuaDebugSession extends DebugSession {
   private handleServerEvents(event: LRDBClient.DebuggerNotify) {
     if (event.method == 'paused') {
       if (event.params.reason === 'entry' && !this._stopOnEntry) {
-        this._debug_client.continue()
+        this._debug_client?.continue()
       } else {
         this.sendEvent(
           new StoppedEvent(event.params.reason, LuaDebugSession.THREAD_ID)

@@ -9,7 +9,37 @@ import * as path from 'path'
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
 import { DebugClient } from 'vscode-debugadapter-testsupport'
-//import { DebugProtocol } from 'vscode-debugprotocol'
+import { DebugProtocol } from 'vscode-debugprotocol'
+
+// DebugProtocol.Variable can have members with memory addresses, these addresses are not reliable.
+// This function will clean them out after validating them.
+function cleanVariable(
+  variable: DebugProtocol.Variable
+): DebugProtocol.Variable {
+  const functionRegex = /^"function: 0x[a-fA-F1-9][a-fA-F0-9]*"$/
+  const tableRegex = /^0x[a-fA-F1-9][a-fA-F0-9]*$/
+  if (variable.type === 'string' && variable.value.match(functionRegex)) {
+    variable.value = 'function: 0x0'
+    return variable
+  } else if (variable.type === 'object') {
+    const variables: Record<
+      string,
+      string | number | { table: string }
+    > = JSON.parse(variable.value)
+    for (const k in variables) {
+      const v = variables[k]
+      if (typeof v === 'string' && v.match(functionRegex)) {
+        variables[k] = 'function: 0x0'
+      } else if (typeof v === 'object' && v.table.match(tableRegex)) {
+        v.table = '0x0'
+      }
+    }
+    variable.value = JSON.stringify(variables)
+    return variable
+  } else {
+    return variable
+  }
+}
 
 function sequenceVariablesRequest(
   dc: DebugClient,
@@ -27,17 +57,20 @@ function sequenceVariablesRequest(
           })
         }
       }
+
       throw Error(
         'not found:' + p + ' in ' + JSON.stringify(response.body.variables)
       )
     })
   }
+
   return req.then((response) => {
     for (const va of response.body.variables) {
       if (va.name == last) {
         return va
       }
     }
+
     throw Error(
       'not found:' + last + ' in ' + JSON.stringify(response.body.variables)
     )
@@ -62,7 +95,6 @@ describe('Lua Debug Adapter', () => {
   describe('basic', () => {
     test('unknown request should produce error', async () => {
       const response = dc.send('illegal_request')
-
       await expect(response).rejects.toThrow()
     })
   })
@@ -70,7 +102,7 @@ describe('Lua Debug Adapter', () => {
   describe('initialize', () => {
     test('should return supported features', async () => {
       const response = await dc.initializeRequest()
-      expect(response.body.supportsConfigurationDoneRequest).toBe(true)
+      expect(response.body?.supportsConfigurationDoneRequest).toBe(true)
     })
 
     test("should produce error for invalid 'pathFormat'", async () => {
@@ -121,6 +153,7 @@ describe('Lua Debug Adapter', () => {
       await expect(response).resolves.toHaveLength(3)
     })
   })
+
   describe('evaluate', () => {
     beforeEach(async () => {
       const PROGRAM = path.join(DATA_ROOT, 'loop_test.lua')
@@ -130,6 +163,7 @@ describe('Lua Debug Adapter', () => {
         dc.waitForEvent('stopped'),
       ])
     })
+
     test('check watch results 1', async () => {
       const response = dc
         .evaluateRequest({
@@ -178,6 +212,7 @@ describe('Lua Debug Adapter', () => {
         })
       await expect(response).resolves.toMatchObject({ name: '2', value: '4' })
     })
+
     test('watch object value ["a"][2]', async () => {
       const response = dc
         .evaluateRequest({
@@ -205,6 +240,7 @@ describe('Lua Debug Adapter', () => {
         { path: PROGRAM, line: BREAK_LINE }
       )
     })
+
     function getUpvalueScope(frameID: number) {
       return dc.scopesRequest({ frameId: frameID }).then((response) => {
         for (const scope of response.body.scopes) {
@@ -212,24 +248,37 @@ describe('Lua Debug Adapter', () => {
             return scope
           }
         }
+
         throw Error('upvalue not found')
       })
     }
+
     test('check upvalues', async () => {
       return dc
         .scopesRequest({ frameId: 0 })
-        .then((res) =>
-          res.body.scopes.find((scope) => scope.name === 'Upvalues')
-        )
+        .then((res) => {
+          const ref = res.body.scopes.find((scope) => scope.name === 'Upvalues')
+          if (!ref) {
+            throw Error('scope not found')
+          }
+
+          return ref
+        })
         .then((ref) => dc.variablesRequest(ref))
+        .then((res) => {
+          res.body.variables = res.body.variables.map(cleanVariable)
+          return res
+        })
         .then((res) => expect(res).toMatchSnapshot())
     })
+
     test('check upvalue a', async () => {
       const response = getUpvalueScope(0).then((scope) => {
         return sequenceVariablesRequest(dc, scope.variablesReference, ['a'])
       })
       await expect(response).resolves.toMatchObject({ name: 'a', value: '1' })
     })
+
     test('check upvalue table ["t"][1][1]', async () => {
       //local t={{1,2,3,4},5,6}
       const response = getUpvalueScope(0).then((scope) => {
@@ -253,6 +302,7 @@ describe('Lua Debug Adapter', () => {
       })
       await expect(response).resolves.toMatchObject({ name: '3', value: '3' })
     })
+
     test('check upvalue table ["t"][2]', async () => {
       const response = getUpvalueScope(0).then((scope) => {
         return sequenceVariablesRequest(dc, scope.variablesReference, [
@@ -273,11 +323,23 @@ describe('Lua Debug Adapter', () => {
         { path: PROGRAM, line: BREAK_LINE }
       )
     })
+
     test('check global values', async () => {
       return dc
         .scopesRequest({ frameId: 0 })
-        .then((res) => res.body.scopes.find((scope) => scope.name === 'Global'))
+        .then((res) => {
+          const ref = res.body.scopes.find((scope) => scope.name === 'Global')
+          if (!ref) {
+            throw Error('scope not found')
+          }
+
+          return ref
+        })
         .then((ref) => dc.variablesRequest(ref))
+        .then((res) => {
+          res.body.variables = res.body.variables.map(cleanVariable)
+          return res
+        })
         .then((res) => expect(res).toMatchSnapshot())
     })
   })
@@ -291,6 +353,7 @@ describe('Lua Debug Adapter', () => {
         { path: PROGRAM, line: BREAK_LINE }
       )
     })
+
     function getLocalScope(frameID: number) {
       return dc.scopesRequest({ frameId: frameID }).then((response) => {
         for (const scope of response.body.scopes) {
@@ -298,6 +361,7 @@ describe('Lua Debug Adapter', () => {
             return scope
           }
         }
+
         throw Error('local value not found')
       })
     }
@@ -305,10 +369,22 @@ describe('Lua Debug Adapter', () => {
     test('check local_values', async () => {
       return dc
         .scopesRequest({ frameId: 0 })
-        .then((res) => res.body.scopes.find((scope) => scope.name === 'Local'))
+        .then((res) => {
+          const ref = res.body.scopes.find((scope) => scope.name === 'Local')
+          if (!ref) {
+            throw Error('scope not found')
+          }
+
+          return ref
+        })
         .then((ref) => dc.variablesRequest(ref))
+        .then((res) => {
+          res.body.variables = res.body.variables.map(cleanVariable)
+          return res
+        })
         .then((res) => expect(res).toMatchSnapshot())
     })
+
     test('get local_value1', async () => {
       const response = await getLocalScope(0).then((scope) => {
         return sequenceVariablesRequest(dc, scope.variablesReference, [
@@ -318,6 +394,7 @@ describe('Lua Debug Adapter', () => {
 
       expect(response.value).toBe('1')
     })
+
     test('get local_value2', async () => {
       const response = await getLocalScope(0).then((scope) => {
         return sequenceVariablesRequest(dc, scope.variablesReference, [
@@ -326,6 +403,7 @@ describe('Lua Debug Adapter', () => {
       })
       expect(response.value).toBe('"abc"')
     })
+
     test('get local_value3', async () => {
       const response = await getLocalScope(0).then((scope) => {
         return sequenceVariablesRequest(dc, scope.variablesReference, [
@@ -334,6 +412,7 @@ describe('Lua Debug Adapter', () => {
       })
       expect(response.value).toBe('1')
     })
+
     test('get local_value4', async () => {
       const response = await getLocalScope(0).then((scope) => {
         return sequenceVariablesRequest(dc, scope.variablesReference, [
