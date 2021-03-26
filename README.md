@@ -74,4 +74,5 @@ launch.json example:
 ## Icon licensing
 
 [Lua icon](https://www.lua.org/images)
+
 [Search for virus (modified)](https://www.flaticon.com/free-icon/search-for-virus_95496)
