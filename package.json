@@ -1,9 +1,9 @@
 {
-  "name": "lrdb",
-  "displayName": "LRDB",
-  "description": "Lua Remote DeBugger",
-  "version": "0.3.4",
-  "publisher": "satoren",
+  "name": "gmrdb",
+  "displayName": "GMRDB",
+  "description": "Garry's Mod Remote DeBugger",
+  "version": "0.4.0",
+  "publisher": "metaman",
   "engines": {
     "vscode": "^1.54.3"
   },
@@ -12,18 +12,17 @@
   ],
   "dependencies": {
     "lrdb-debuggable-lua": "^0.5.4",
-    "vscode-debugadapter": "^1.45.0",
-    "vscode-nls": "^5.0.0"
+    "vscode-debugadapter": "^1.45.0"
   },
   "activationEvents": [
     "onDebug"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/satoren/vscode-lrdb.git"
+    "url": "https://github.com/danielga/vscode-gmrdb.git"
   },
   "bugs": {
-    "url": "https://github.com/satoren/vscode-lrdb/issues"
+    "url": "https://github.com/danielga/vscode-gmrdb/issues"
   },
   "main": "./out/extension.js",
   "scripts": {
@@ -34,9 +33,9 @@
     "build": "tsc",
     "jest": "jest",
     "test": "run-s build jest",
+    "lint": "run-s lint:eslint lint:prettier",
     "lint:eslint": "eslint . --cache --ext ts",
     "lint:prettier": "prettier . --check",
-    "lint": "run-s lint:eslint lint:prettier",
     "fix": "run-s fix:eslint fix:prettier",
     "fix:eslint": "eslint . --cache --ext ts --fix",
     "fix:prettier": "prettier . --check --write"
@@ -59,7 +58,6 @@
     "vsce": "^1.87.0",
     "vscode-debugadapter-testsupport": "^1.45.0",
     "vscode-debugprotocol": "^1.45.0",
-    "vscode-nls-dev": "^3.3.2",
     "vscode-test": "^1.5.1"
   },
   "icon": "images/icon.png",
@@ -68,41 +66,50 @@
     "breakpoints": [
       {
         "language": "lua"
+      },
+      {
+        "language": "glua"
       }
     ],
     "debuggers": [
       {
-        "type": "lrdb",
-        "label": "Lua Debug",
+        "type": "gmrdb",
+        "label": "Garry's Mod Remote DeBugger",
         "program": "./out/debugAdapter.js",
         "runtime": "node",
         "languages": [
-          "lua"
+          "lua",
+          "glua"
         ],
         "variables": {},
         "configurationSnippets": [
           {
-            "label": "Lua: (lrdb) Launch",
-            "description": "A new configuration for launching a lua program",
+            "label": "Garry's Mod: (gmrdb) Launch",
+            "description": "A new configuration for launching a Garry's Mod instance.",
             "body": {
-              "type": "lrdb",
+              "type": "gmrdb",
               "request": "launch",
-              "name": "${2:Launch Program}",
-              "program": "Lua program file or Lua host executable.",
+              "name": "${2:Launch}",
+              "program": "Garry's Mod executable (either a client or SRCDS executable).",
               "args": [],
-              "cwd": "${workspaceFolder}"
+              "cwd": "${workspaceFolder}",
+              "sourceFileMap": {
+                "${workspaceFolder}": "."
+              }
             }
           },
           {
-            "label": "Lua: (lrdb) Attach",
-            "description": "A new configuration for attaching a LRDB embeded program",
+            "label": "Garry's Mod: (gmrdb) attach",
+            "description": "A new configuration for remotely debugging a Garry's Mod instance.",
             "body": {
-              "type": "lrdb",
+              "type": "gmrdb",
               "request": "attach",
               "name": "${1:Attach}",
               "host": "localhost",
-              "port": 21110,
-              "sourceRoot": "${workspaceFolder}"
+              "port": 21111,
+              "sourceFileMap": {
+                "${workspaceFolder}": "."
+              }
             }
           }
         ],
@@ -114,12 +121,12 @@
             "properties": {
               "program": {
                 "type": "string",
-                "description": "Lua program file or Lua host program with embedded LRDB.",
+                "description": "Garry's Mod executable (either a client or SRCDS executable).",
                 "default": "${file}"
               },
               "cwd": {
                 "type": "string",
-                "description": "working directory.",
+                "description": "Working directory (usually path where the executable is).",
                 "default": "${workspaceFolder}"
               },
               "args": {
@@ -127,21 +134,20 @@
                 "description": "Command line arguments.",
                 "default": []
               },
-              "useInternalLua": {
-                "type": [
-                  "boolean",
-                  "null"
-                ],
-                "description": "If true use internal(in this Extension) Lua interpreter, false direct execute `program`",
-                "default": null
+              "port": {
+                "type": "number",
+                "description": "Port to connect to.",
+                "default": 21111
               },
               "sourceRoot": {
-                "type": [
-                  "string",
-                  "array"
-                ],
-                "description": "script source root directory. to be used in souce file matching at breakpoints.",
+                "type": "string",
+                "description": "Script source root directory (used in souce file matching at breakpoints).",
                 "default": "${workspaceFolder}"
+              },
+              "sourceFileMap": {
+                "type": "object",
+                "description": "Optional source file mappings passed to the debug engine (relates a local path to a target path).",
+                "default": {}
               },
               "stopOnEntry": {
                 "type": "boolean",
@@ -152,27 +158,28 @@
           },
           "attach": {
             "required": [
-              "host",
-              "port"
+              "sourceRoot"
             ],
             "properties": {
               "host": {
                 "type": "string",
-                "description": "host name.",
+                "description": "Host name to connect to.",
                 "default": "localhost"
               },
               "port": {
                 "type": "number",
-                "description": "port",
-                "default": 21110
+                "description": "Port to connect to.",
+                "default": 21111
               },
               "sourceRoot": {
-                "type": [
-                  "string",
-                  "array"
-                ],
-                "description": "script source root directory.",
+                "type": "string",
+                "description": "Script source root directory (used in souce file matching at breakpoints).",
                 "default": "${workspaceFolder}"
+              },
+              "sourceFileMap": {
+                "type": "object",
+                "description": "Optional source file mappings passed to the debug engine (relates a local path to a target path).",
+                "default": {}
               },
               "stopOnEntry": {
                 "type": "boolean",
