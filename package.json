@@ -12,7 +12,8 @@
   ],
   "dependencies": {
     "lrdb-debuggable-lua": "^0.5.4",
-    "vscode-debugadapter": "^1.45.0"
+    "vscode-debugadapter": "^1.45.0",
+    "tree-kill": "^1.2.2"
   },
   "activationEvents": [
     "onDebug"

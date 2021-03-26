@@ -28,6 +28,7 @@ import {
   PausedNotify,
   RunningNotify,
 } from 'lrdb-debuggable-lua/dist/Client'
+import * as treeKill from 'tree-kill'
 
 export interface LaunchRequestArguments
   extends DebugProtocol.LaunchRequestArguments {
@@ -160,7 +161,7 @@ export class GarrysModDebugSession extends DebugSession {
     _args: DebugProtocol.InitializeRequestArguments
   ): void {
     if (this._debug_server_process) {
-      this._debug_server_process.kill()
+      treeKill(this._debug_server_process.pid)
       delete this._debug_server_process
     }
 
@@ -251,7 +252,12 @@ export class GarrysModDebugSession extends DebugSession {
 
     const programArgs = args.args ? args.args : []
 
-    this._debug_server_process = spawn(args.program, programArgs, { cwd: cwd })
+    // only using the shell seems to be able to run SRCDS without causing engine errors and removing all output from its window
+    this._debug_server_process = spawn(args.program, programArgs, {
+      cwd: cwd,
+      shell: true,
+      windowsHide: true
+    })
 
     const port = args.port ? args.port : 21111
 
@@ -265,14 +271,6 @@ export class GarrysModDebugSession extends DebugSession {
 
     this._debug_client.onOpen.on(() => {
       this.sendEvent(new InitializedEvent())
-    })
-
-    this._debug_server_process.stdout?.on('data', (data) => {
-      this.sendEvent(new OutputEvent(data.toString(), 'stdout'))
-    })
-
-    this._debug_server_process.stderr?.on('data', (data) => {
-      this.sendEvent(new OutputEvent(data.toString(), 'stderr'))
     })
 
     this._debug_server_process.on('error', (msg: string) => {
@@ -521,7 +519,7 @@ export class GarrysModDebugSession extends DebugSession {
               .then((res) => res.result)
           case 'eval':
             return this._debug_client.eval(parent.params).then((res) => {
-              const results = res.result as [any]
+              const results = res.result as any[]
               return results[0]
             })
           default:
@@ -672,7 +670,7 @@ export class GarrysModDebugSession extends DebugSession {
     _args: DebugProtocol.DisconnectArguments
   ): void {
     if (this._debug_server_process) {
-      this._debug_server_process.kill()
+      treeKill(this._debug_server_process.pid)
       delete this._debug_server_process
     }
 
