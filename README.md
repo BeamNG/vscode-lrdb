@@ -13,7 +13,7 @@ Based on the work from
 [satoren/vscode-lrdb](https://github.com/satoren/vscode-lrdb) and
 [kapecp/vscode-lrdb](https://github.com/kapecp/vscode-lrdb).
 
-![Lua debug](https://raw.githubusercontent.com/danielga/vscode-gmrdb/master/images/lrdb.gif)
+![Garry's Mod debug](https://raw.githubusercontent.com/danielga/vscode-gmrdb/master/images/lrdb.gif)
 
 ## Features
 
@@ -70,3 +70,8 @@ launch.json example:
   ]
 }
 ```
+
+## Icon licensing
+
+[Lua icon](https://www.lua.org/images)
+[Search for virus (modified)](https://www.flaticon.com/free-icon/search-for-virus_95496)
