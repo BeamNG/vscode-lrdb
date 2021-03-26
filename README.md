@@ -39,10 +39,33 @@ launch.json example:
       "request": "attach",
       "host": "localhost",
       "port": 21111,
-      "name": "Attach to remote debugger",
+      "name": "Attach to Garry's Mod",
+      "sourceRoot": "C:/Program Files (x86)/Steam/steamapps/common/GarrysMod/garrysmod",
       "sourceFileMap": {
-        "${workspaceFolder}": "."
-      }
+        "${workspaceFolder}": "addons/test"
+      },
+      "stopOnEntry": true
+    },
+    {
+      "type": "gmrdb",
+      "request": "launch",
+      "name": "Launch Garry's Mod",
+      "program": "C:/steamcmd/garrysmod_windows_server_beta/srcds_win64.exe",
+      "cwd": "C:/steamcmd/garrysmod_windows_server_beta",
+      "args": [
+        "-console",
+        "-game", "garrysmod",
+        "-ip", "localhost",
+        "-port", "27015",
+        "+map", "gm_construct",
+        "+maxplayers", "2"
+      ],
+      "sourceRoot": "C:/steamcmd/garrysmod_windows_server_beta/garrysmod",
+      "port": 21111,
+      "sourceFileMap": {
+        "${workspaceFolder}": "addons/test"
+      },
+      "stopOnEntry": true
     }
   ]
 }
