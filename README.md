@@ -13,7 +13,7 @@ Based on the work from
 [satoren/vscode-lrdb](https://github.com/satoren/vscode-lrdb) and
 [kapecp/vscode-lrdb](https://github.com/kapecp/vscode-lrdb).
 
-![Garry's Mod debug](https://raw.githubusercontent.com/danielga/vscode-gmrdb/master/images/lrdb.gif)
+![Garry's Mod debug](https://raw.githubusercontent.com/danielga/vscode-gmrdb/master/images/gmrdb.gif)
 
 ## Features
 

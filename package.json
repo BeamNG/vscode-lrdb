@@ -2,7 +2,7 @@
   "name": "gmrdb",
   "displayName": "GMRDB",
   "description": "Garry's Mod Remote DeBugger",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "publisher": "metaman",
   "engines": {
     "vscode": "^1.54.3"
