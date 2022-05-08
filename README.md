@@ -44,7 +44,7 @@ the modules will not be loaded.
 
 For this example, we're using SRCDS from the `x86-64` beta branch on Windows.
 
-The server will freeze *until* we attach the debugger through VSCode and *resume*.
+The server will freeze _until_ we attach the debugger through VSCode and _resume_.
 
 1. Place the `gmsv_rdb_win64.dll` binary module in `garrysmod/lua/bin` - [guide](https://wiki.facepunch.com/gmod/Creating_Binary_Modules)
 2. (Optional) Add the following snippet wherever we want to start the server
@@ -93,11 +93,16 @@ Feel free to use variables like `workspaceFolder` to specify paths as a shortcut
       "cwd": "C:/example-srcds",
       "args": [
         "-console",
-        "-game", "garrysmod",
-        "-ip", "127.0.0.1",
-        "-port", "27015",
-        "+map", "gm_construct",
-        "+maxplayers", "2"
+        "-game",
+        "garrysmod",
+        "-ip",
+        "127.0.0.1",
+        "-port",
+        "27015",
+        "+map",
+        "gm_construct",
+        "+maxplayers",
+        "2"
       ],
       "sourceRoot": "C:/example-srcds/garrysmod",
       "port": 21111,
@@ -115,7 +120,7 @@ Feel free to use variables like `workspaceFolder` to specify paths as a shortcut
 
 This follows similar steps to server-side debugging on Windows 64-bit.
 
-The client will freeze *until* we attach the debugger through VSCode and *resume*.
+The client will freeze _until_ we attach the debugger through VSCode and _resume_.
 
 It is possible to join a server that will load the module on your client.
 Just be wary if this is what you want, since ANY server can do this.
@@ -123,7 +128,7 @@ The only effect of this should be your game freezing until you attach a debugger
 on it. Someone else remotely debugging your game should be considered a bug!
 
 1. Place the `gmcl_rdb_win64.dll` binary module in `garrysmod/lua/bin` in our
-local Garry's Mod installation - [guide](https://wiki.facepunch.com/gmod/Creating_Binary_Modules)
+   local Garry's Mod installation - [guide](https://wiki.facepunch.com/gmod/Creating_Binary_Modules)
 1. (Optional) Add the following snippet wherever we want to start the debugging server
 
 ```lua

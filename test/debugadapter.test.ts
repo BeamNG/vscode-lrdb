@@ -22,10 +22,8 @@ function cleanVariable(
     variable.value = 'function: 0x0'
     return variable
   } else if (variable.type === 'object') {
-    const variables: Record<
-      string,
-      string | number | { table: string }
-    > = JSON.parse(variable.value)
+    const variables: Record<string, string | number | { table: string }> =
+      JSON.parse(variable.value)
     for (const k in variables) {
       const v = variables[k]
       if (typeof v === 'string' && v.match(functionRegex)) {

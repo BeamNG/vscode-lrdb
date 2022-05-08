@@ -53,7 +53,8 @@ export function deactivate(): void {
 }
 
 class GMRDBInlineDebugAdapterDescriptorFactory
-  implements vscode.DebugAdapterDescriptorFactory {
+  implements vscode.DebugAdapterDescriptorFactory
+{
   createDebugAdapterDescriptor(
     _session: vscode.DebugSession,
     _executable: vscode.DebugAdapterExecutable | undefined
@@ -65,7 +66,8 @@ class GMRDBInlineDebugAdapterDescriptorFactory
 }
 
 class GMRDBServerDebugAdapterDescriptorFactory
-  implements vscode.DebugAdapterDescriptorFactory {
+  implements vscode.DebugAdapterDescriptorFactory
+{
   private server?: net.Server
 
   createDebugAdapterDescriptor(
@@ -94,7 +96,8 @@ class GMRDBServerDebugAdapterDescriptorFactory
 }
 
 class GMRDBDebugConfigurationProvider
-  implements vscode.DebugConfigurationProvider {
+  implements vscode.DebugConfigurationProvider
+{
   /**
    * Try to add all missing attributes to the debug configuration being launched.
    */

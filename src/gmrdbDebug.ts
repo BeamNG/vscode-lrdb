@@ -161,7 +161,10 @@ export class GarrysModDebugSession extends DebugSession {
     _args: DebugProtocol.InitializeRequestArguments
   ): void {
     if (this._debug_server_process) {
-      treeKill(this._debug_server_process.pid)
+      if (this._debug_server_process.pid) {
+        treeKill(this._debug_server_process.pid)
+      }
+
       delete this._debug_server_process
     }
 
@@ -256,7 +259,7 @@ export class GarrysModDebugSession extends DebugSession {
     this._debug_server_process = spawn(args.program, programArgs, {
       cwd: cwd,
       shell: true,
-      windowsHide: true
+      windowsHide: true,
     })
 
     const port = args.port ? args.port : 21111
@@ -335,7 +338,7 @@ export class GarrysModDebugSession extends DebugSession {
     // read file contents into array for direct access
     const lines = readFileSync(path).toString().split('\n')
 
-    const breakpoints = new Array<Breakpoint>()
+    const breakpoints = new Array<DebugProtocol.Breakpoint>()
 
     const debuggerFilePath = this.convertClientPathToDebugger(path)
 
@@ -670,7 +673,10 @@ export class GarrysModDebugSession extends DebugSession {
     _args: DebugProtocol.DisconnectArguments
   ): void {
     if (this._debug_server_process) {
-      treeKill(this._debug_server_process.pid)
+      if (this._debug_server_process.pid) {
+        treeKill(this._debug_server_process.pid)
+      }
+
       delete this._debug_server_process
     }
 
@@ -699,7 +705,7 @@ export class GarrysModDebugSession extends DebugSession {
         params: args.expression.substr(4) + '\n',
         id: 0,
       }
-      this._debug_client.send((request as unknown) as DebugRequest)
+      this._debug_client.send(request as unknown as DebugRequest)
       response.success = true
       this.sendResponse(response)
       return
