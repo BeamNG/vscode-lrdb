@@ -8,8 +8,8 @@ import * as path from 'path'
 
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
-import { DebugClient } from 'vscode-debugadapter-testsupport'
-import { DebugProtocol } from 'vscode-debugprotocol'
+import { DebugClient } from '@vscode/debugadapter-testsupport'
+import { DebugProtocol } from '@vscode/debugprotocol'
 
 // DebugProtocol.Variable can have members with memory addresses, these addresses are not reliable.
 // This function will clean them out after validating them.

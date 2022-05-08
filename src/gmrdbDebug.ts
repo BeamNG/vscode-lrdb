@@ -11,8 +11,8 @@ import {
   Source,
   Handles,
   Breakpoint,
-} from 'vscode-debugadapter'
-import { DebugProtocol } from 'vscode-debugprotocol'
+} from '@vscode/debugadapter'
+import { DebugProtocol } from '@vscode/debugprotocol'
 import { readFileSync } from 'fs'
 import { spawn, ChildProcess } from 'child_process'
 import * as path from 'path'
