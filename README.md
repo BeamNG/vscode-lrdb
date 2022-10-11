@@ -17,7 +17,7 @@ Based on the work from
 [satoren/vscode-lrdb](https://github.com/satoren/vscode-lrdb) and
 [kapecp/vscode-lrdb](https://github.com/kapecp/vscode-lrdb).
 
-![Lua debug](https://raw.githubusercontent.com/danielga/vscode-lrdb/master/images/lrdb.gif)
+![Lua debug](https://raw.githubusercontent.com/danielga/vscode-lrdb/master/images/gmrdb.gif)
 
 ## Features
 
