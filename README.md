@@ -1,23 +1,23 @@
-# Garry's Mod Remote DeBugger for Visual Studio Code
+# Lua Remote DeBugger for Visual Studio Code
 
 ## Introduction
 
 This extension allows debugging Lua code and using the Source engine console
-of Garry's Mod clients or SRCDS (SouRCe Dedicated Server) instances,
+of Lua clients or SRCDS (SouRCe Dedicated Server) instances,
 through Visual Studio Code.
 
 This works by running a [remote debugging server](https://github.com/danielga/gm_rdb)
 on SRCDS listening on a port. The VSCode extension is then used to attach a
 debugger to provide breakpoints.
 
-This fork works only with the Garry's Mod module
+This fork works only with the Lua module
 [danielga/gm_rdb](https://github.com/danielga/gm_rdb).
 
 Based on the work from
 [satoren/vscode-lrdb](https://github.com/satoren/vscode-lrdb) and
 [kapecp/vscode-lrdb](https://github.com/kapecp/vscode-lrdb).
 
-![Garry's Mod debug](https://raw.githubusercontent.com/danielga/vscode-gmrdb/master/images/gmrdb.gif)
+![Lua debug](https://raw.githubusercontent.com/danielga/vscode-lrdb/master/images/lrdb.gif)
 
 ## Features
 
@@ -32,7 +32,7 @@ Based on the work from
 
 ## Requirements
 
-- [Garry's Mod Remote Debugger binary modules](https://github.com/danielga/gm_rdb/releases)
+- [Lua Remote Debugger binary modules](https://github.com/danielga/gm_rdb/releases)
 - SRCDS 32-bit or 64-bit
 
 ## Usage
@@ -70,11 +70,11 @@ Feel free to use variables like `workspaceFolder` to specify paths as a shortcut
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "gmrdb",
+      "type": "lrdb",
       "request": "attach",
       "host": "127.0.0.1",
       "port": 21111,
-      "name": "Attach to Garry's Mod",
+      "name": "Attach to Lua",
       "sourceRoot": "C:/example-srcds/garrysmod",
       // Important to map Lua source code to breakpoints
       // (otherwise we'll see missing file errors on VSCode)
@@ -86,9 +86,9 @@ Feel free to use variables like `workspaceFolder` to specify paths as a shortcut
       "stopOnEntry": true
     },
     {
-      "type": "gmrdb",
+      "type": "lrdb",
       "request": "launch",
-      "name": "Launch Garry's Mod",
+      "name": "Launch Lua",
       "program": "C:/example-srcds/srcds_win64.exe",
       "cwd": "C:/example-srcds",
       "args": [
@@ -128,7 +128,7 @@ The only effect of this should be your game freezing until you attach a debugger
 on it. Someone else remotely debugging your game should be considered a bug!
 
 1. Place the `gmcl_rdb_win64.dll` binary module in `garrysmod/lua/bin` in our
-   local Garry's Mod installation - [guide](https://wiki.facepunch.com/gmod/Creating_Binary_Modules)
+   local Lua installation - [guide](https://wiki.facepunch.com/gmod/Creating_Binary_Modules)
 1. (Optional) Add the following snippet wherever we want to start the debugging server
 
 ```lua
@@ -152,11 +152,11 @@ Feel free to use variables like `workspaceFolder` to specify paths as a shortcut
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "gmrdb",
+      "type": "lrdb",
       "request": "attach",
       "host": "127.0.0.1",
       "port": 21111,
-      "name": "Attach to Garry's Mod",
+      "name": "Attach to Lua",
       "sourceRoot": "C:/steamapps/common/garrysmod",
       // Important to map Lua source code to breakpoints
       // (otherwise we'll see missing file errors on VSCode)

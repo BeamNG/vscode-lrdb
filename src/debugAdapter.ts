@@ -1,3 +1,3 @@
-import { GarrysModDebugSession } from './gmrdbDebug'
+import { GarrysModDebugSession } from './lrdbDebug'
 
 GarrysModDebugSession.run(GarrysModDebugSession)

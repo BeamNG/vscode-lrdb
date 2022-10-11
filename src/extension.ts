@@ -3,18 +3,18 @@
 import * as path from 'path'
 import * as vscode from 'vscode'
 import * as net from 'net'
-import { GarrysModDebugSession } from './gmrdbDebug'
+import { GarrysModDebugSession } from './lrdbDebug'
 
 // The compile time flag 'runMode' controls how the debug adapter is run.
 // Please note: the test suite only supports 'external' mode.
 // 'inline' mode is great for debugging.
-const runMode: 'external' | 'server' | 'inline' = 'external'
+const runMode: 'external' | 'server' | 'inline' = 'server'
 
 export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     vscode.debug.registerDebugConfigurationProvider(
-      'gmrdb',
-      new GMRDBDebugConfigurationProvider()
+      'lrdb',
+      new LRDBDebugConfigurationProvider()
     )
   )
 
@@ -23,12 +23,12 @@ export function activate(context: vscode.ExtensionContext): void {
   switch (runMode) {
     case 'server':
       // run the debug adapter as a server inside the extension and communicating via a socket
-      factory = new GMRDBServerDebugAdapterDescriptorFactory()
+      factory = new LRDBServerDebugAdapterDescriptorFactory()
       break
 
     case 'inline':
       // run the debug adapter inside the extension and directly talk to it
-      factory = new GMRDBInlineDebugAdapterDescriptorFactory()
+      factory = new LRDBInlineDebugAdapterDescriptorFactory()
       break
 
     case 'external':
@@ -39,7 +39,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
   if (factory) {
     context.subscriptions.push(
-      vscode.debug.registerDebugAdapterDescriptorFactory('gmrdb', factory)
+      vscode.debug.registerDebugAdapterDescriptorFactory('LRDB', factory)
     )
 
     if ('dispose' in factory) {
@@ -52,7 +52,7 @@ export function deactivate(): void {
   // nothing to do
 }
 
-class GMRDBInlineDebugAdapterDescriptorFactory
+class LRDBInlineDebugAdapterDescriptorFactory
   implements vscode.DebugAdapterDescriptorFactory
 {
   createDebugAdapterDescriptor(
@@ -65,7 +65,7 @@ class GMRDBInlineDebugAdapterDescriptorFactory
   }
 }
 
-class GMRDBServerDebugAdapterDescriptorFactory
+class LRDBServerDebugAdapterDescriptorFactory
   implements vscode.DebugAdapterDescriptorFactory
 {
   private server?: net.Server
@@ -95,7 +95,7 @@ class GMRDBServerDebugAdapterDescriptorFactory
   }
 }
 
-class GMRDBDebugConfigurationProvider
+class LRDBDebugConfigurationProvider
   implements vscode.DebugConfigurationProvider
 {
   /**

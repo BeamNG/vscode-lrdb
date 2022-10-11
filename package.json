@@ -1,9 +1,9 @@
 {
-  "name": "gmrdb",
-  "displayName": "GMRDB",
-  "description": "Garry's Mod Remote DeBugger",
-  "version": "0.4.4",
-  "publisher": "metaman",
+  "name": "lrdb",
+  "displayName": "lrdb",
+  "description": "Lua Remote DeBugger",
+  "version": "0.5.0",
+  "publisher": "BeamNG",
   "engines": {
     "vscode": "^1.67.0"
   },
@@ -20,10 +20,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/danielga/vscode-gmrdb.git"
+    "url": ""
   },
   "bugs": {
-    "url": "https://github.com/danielga/vscode-gmrdb/issues"
+    "url": ""
   },
   "main": "./out/extension.js",
   "scripts": {
@@ -74,8 +74,8 @@
     ],
     "debuggers": [
       {
-        "type": "gmrdb",
-        "label": "Garry's Mod Remote DeBugger",
+        "type": "lrdb",
+        "label": "Lua Remote DeBugger",
         "program": "./out/debugAdapter.js",
         "runtime": "node",
         "languages": [
@@ -85,13 +85,13 @@
         "variables": {},
         "configurationSnippets": [
           {
-            "label": "Garry's Mod: (gmrdb) Launch",
-            "description": "A new configuration for launching a Garry's Mod instance.",
+            "label": "Lua: (lrdb) Launch",
+            "description": "A new configuration for launching a Lua instance.",
             "body": {
-              "type": "gmrdb",
+              "type": "lrdb",
               "request": "launch",
               "name": "${2:Launch}",
-              "program": "Garry's Mod executable (either a client or SRCDS executable).",
+              "program": "Lua executable (either a client or SRCDS executable).",
               "args": [],
               "cwd": "${workspaceFolder}",
               "sourceFileMap": {
@@ -100,10 +100,10 @@
             }
           },
           {
-            "label": "Garry's Mod: (gmrdb) attach",
-            "description": "A new configuration for remotely debugging a Garry's Mod instance.",
+            "label": "Lua: (lrdb) attach",
+            "description": "A new configuration for remotely debugging a Lua instance.",
             "body": {
-              "type": "gmrdb",
+              "type": "lrdb",
               "request": "attach",
               "name": "${1:Attach}",
               "host": "localhost",
@@ -122,7 +122,7 @@
             "properties": {
               "program": {
                 "type": "string",
-                "description": "Garry's Mod executable (either a client or SRCDS executable).",
+                "description": "Lua executable (either a client or SRCDS executable).",
                 "default": "${file}"
               },
               "cwd": {
