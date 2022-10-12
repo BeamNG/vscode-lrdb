@@ -21,10 +21,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/BeamNG/vscode-lrdb"
   },
   "bugs": {
-    "url": ""
+    "url": "https://github.com/BeamNG/vscode-lrdb/issues"
   },
   "main": "./out/extension.js",
   "scripts": {
@@ -62,7 +62,7 @@
     "vsce": "^2.7.0",
     "vscode-test": "^1.6.1"
   },
-  "icon": "images/lrdb-icon.png",
+  "icon": "https://raw.githubusercontent.com/BeamNG/vscode-lrdb/master/images/lrdb-icon.png",
   "license": "BSL-1.0",
   "contributes": {
     "breakpoints": [
