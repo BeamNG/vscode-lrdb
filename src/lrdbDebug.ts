@@ -119,7 +119,7 @@ function stringify(value: unknown): string {
   }
 }
 
-export class GarrysModDebugSession extends DebugSession {
+export class LuaDebugSession extends DebugSession {
   // Lua
   private static THREAD_ID = 1
 
@@ -391,7 +391,7 @@ export class GarrysModDebugSession extends DebugSession {
   protected threadsRequest(response: DebugProtocol.ThreadsResponse): void {
     // return the default thread
     response.body = {
-      threads: [new Thread(GarrysModDebugSession.THREAD_ID, 'thread 1')],
+      threads: [new Thread(LuaDebugSession.THREAD_ID, 'thread 1')],
     }
 
     this.sendResponse(response)
@@ -758,7 +758,7 @@ export class GarrysModDebugSession extends DebugSession {
           this.sendEvent(
             new StoppedEvent(
               event.params.reason,
-              GarrysModDebugSession.THREAD_ID
+              LuaDebugSession.THREAD_ID
             )
           )
         }
@@ -767,7 +767,7 @@ export class GarrysModDebugSession extends DebugSession {
 
       case 'running':
         this._variableHandles.reset()
-        this.sendEvent(new ContinuedEvent(GarrysModDebugSession.THREAD_ID))
+        this.sendEvent(new ContinuedEvent(LuaDebugSession.THREAD_ID))
         break
 
       case 'exit':

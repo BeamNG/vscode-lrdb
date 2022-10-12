@@ -1,3 +1,3 @@
-import { GarrysModDebugSession } from './lrdbDebug'
+import { LuaDebugSession } from './lrdbDebug'
 
-GarrysModDebugSession.run(GarrysModDebugSession)
+LuaDebugSession.run(LuaDebugSession)

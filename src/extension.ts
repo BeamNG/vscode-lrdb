@@ -3,7 +3,7 @@
 import * as path from 'path'
 import * as vscode from 'vscode'
 import * as net from 'net'
-import { GarrysModDebugSession } from './lrdbDebug'
+import { LuaDebugSession } from './lrdbDebug'
 
 // The compile time flag 'runMode' controls how the debug adapter is run.
 // Please note: the test suite only supports 'external' mode.
@@ -60,7 +60,7 @@ class LRDBInlineDebugAdapterDescriptorFactory
     _executable: vscode.DebugAdapterExecutable | undefined
   ): vscode.ProviderResult<vscode.DebugAdapterDescriptor> {
     return new vscode.DebugAdapterInlineImplementation(
-      new GarrysModDebugSession()
+      new LuaDebugSession()
     )
   }
 }
@@ -78,7 +78,7 @@ class LRDBServerDebugAdapterDescriptorFactory
       // start listening on a random port
       this.server = net
         .createServer((socket) => {
-          const session = new GarrysModDebugSession()
+          const session = new LuaDebugSession()
           session.setRunAsServer(true)
           session.start(socket, socket)
         })
