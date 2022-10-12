@@ -62,7 +62,7 @@
     "vsce": "^2.7.0",
     "vscode-test": "^1.6.1"
   },
-  "icon": "https://raw.githubusercontent.com/BeamNG/vscode-lrdb/master/images/lrdb-icon.png",
+  "icon": "images/lrdb-icon.png",
   "license": "BSL-1.0",
   "contributes": {
     "breakpoints": [
