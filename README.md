@@ -1,10 +1,6 @@
-# Lua Remote DeBugger for Visual Studio Code
+# Lua Remote Debugger for Visual Studio Code
 
 Allows debugging embedded Lua VMs through Visual Studio Code.
-
-It requires a Lua remote debugger extension on the VM to work:
-- [Lua remote debugger](https://github.com/satoren/LRDB)
-- [Garry's mod remote debugger](https://github.com/danielga/gm_rdb)
 
 ![Lua debug](images/demo.gif)
 
@@ -37,7 +33,7 @@ How to use:
 
 # Credits
 
-Thank you so much to everyone working on this tech in team effort! :)
+Thank you very much to everyone working on this tech in open source team effort! :)
 
 Based on the work from:
 - [danielga/vscode-gmrdb](https://github.com/danielga/vscode-gmrdb)
