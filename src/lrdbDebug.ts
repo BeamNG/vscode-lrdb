@@ -27,6 +27,7 @@ import {
   GetUpvaluesRequest,
   PausedNotify,
   RunningNotify,
+  SetVarRequest,
 } from './debugger/Client'
 import * as treeKill from 'tree-kill'
 
@@ -970,6 +971,55 @@ export class LuaDebugSession extends DebugSession {
   }
 
   protected setVariableRequest(response: DebugProtocol.SetVariableResponse, args: DebugProtocol.SetVariableArguments, request?: DebugProtocol.Request): void {
-    console.log("args");
+    try {
+      if (!this._debug_client) {
+        response.success = false
+        this.sendResponse(response)
+        return
+      }
+
+      const parent = this._variableHandles.get(args.variablesReference)
+      let varScope = 'local'
+      if (parent != null) {
+        if(parent.type === 'get_local_variable') varScope = 'local'
+        else if(parent.type === 'get_upvalues') varScope = 'up'
+        else if(parent.type === 'get_global') varScope = 'global'
+      }
+
+      let value: string | number | boolean = args.value;
+      if(value === 'true') {
+        value = true
+      } else if(value === 'true') {
+        value = false
+      }
+      if(String(Number(value)) == value) {
+        value = Number(value)
+      }
+
+      const params: SetVarRequest['params'] = {
+        name: args.name,
+        value: value,
+        scope: varScope
+      }
+      this._debug_client.setVar(params).then((res) => {
+        response.success = res.result
+        if(response.success) {
+          const body: DebugProtocol.SetVariableResponse['body'] = {
+            value: args.value
+          }
+          response.body = body
+        }
+        this.sendResponse(response)
+      })
+    } catch(e) {
+      response.success = false
+      if (typeof e === "string") {
+        response.message = `Debug Adapter exception: ${e}`
+      } else if (e instanceof Error) {
+        response.message = `Debug Adapter exception: ${e.message}`
+      }
+      this.sendEvent(new OutputEvent(response.message + "\n"))
+      this.sendResponse(response)      
+    }
   }
 }

@@ -22,6 +22,7 @@ export type DebugRequest =
   | GetUpvaluesRequest
   | EvalRequest
   | GetGlobalRequest
+  | SetVarRequest
 
 export interface DebugClientAdapter {
   onMessage: TypedEventTarget<JsonRpcMessage>
@@ -151,6 +152,15 @@ export class Client {
       id: this.seqId++,
       params,
     })
+  setVar = (
+    params: SetVarRequest['params']
+  ): Promise<DebugResponseType<SetVarRequest>> =>
+    this.send({
+      method: 'set_var',
+      jsonrpc: '2.0',
+      id: this.seqId++,
+      params,
+    })
   getGlobal = (
     params: GetGlobalRequest['params']
   ): Promise<DebugResponseType<GetGlobalRequest>> =>
@@ -268,6 +278,14 @@ export interface EvalRequest extends JsonRpcRequest {
     upvalue?: boolean
   }
 }
+export interface SetVarRequest extends JsonRpcRequest {
+  method: 'set_var'
+  params: {
+    scope: string
+    name: string
+    value: number | string | boolean
+  }
+}
 export interface GetGlobalRequest extends JsonRpcRequest {
   method: 'get_global'
   params?: {
@@ -290,7 +308,7 @@ type Breakpoint = {
   hit_count: number
 }
 
-type ResponceResultType = {
+type ResponseResultType = {
   get_stacktrace: StackInfo[]
   get_local_variable: Record<string, unknown>
   get_upvalues: Record<string, unknown>
@@ -304,8 +322,9 @@ type ResponceResultType = {
   add_breakpoint: never
   get_breakpoints: Breakpoint[]
   clear_breakpoints: never
+  set_var: boolean
 }
 
 export type DebugResponseType<T extends DebugRequest> = Pick<T, 'id'> & {
-  result: ResponceResultType[T['method']]
+  result: ResponseResultType[T['method']]
 }
