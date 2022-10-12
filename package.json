@@ -1,6 +1,6 @@
 {
-  "name": "lrdb",
-  "displayName": "lrdb",
+  "name": "lrdb-beamng",
+  "displayName": "lrdb-beamng",
   "description": "Lua Remote DeBugger",
   "version": "0.5.0",
   "publisher": "BeamNG",
