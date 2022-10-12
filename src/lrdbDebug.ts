@@ -78,6 +78,10 @@ export interface ConnectedNotify extends JsonRpcNotify {
   params: { 
     lua?: {
       version?: string
+      productName?: string
+      productVersion?: string
+      shipping?: boolean
+      vmType?: string
     },
     working_directory?: string
   }

@@ -20,6 +20,37 @@ export function activate(context: vscode.ExtensionContext): void {
     treeDataProvider.refreshCommand()
   )
 
+  vscode.commands.registerCommand('lrdb.toggleDebugging', (hostname, port) => {
+    // look for relevant session
+    for (const [key, di] of treeDataProvider.openPorts) {
+      if(di.hostname === hostname && di.port === port && (di.debugSession !== undefined)) {
+        vscode.debug.stopDebugging(di.debugSession)
+        setTimeout(()=>treeDataProvider.refreshCommand(), 100)
+        return
+      }
+    }
+    vscode.debug.startDebugging(undefined, {
+      "type": "lrdb",
+      "request": "attach",
+      "name": "Attach",
+      "host": hostname,
+      "port": port,
+      "sourceRoot": "${workspaceFolder}",
+    })
+    treeDataProvider.refreshCommand()
+  })
+
+  vscode.commands.registerCommand('lrdb.startDebugging', (hostname, port) => {
+    vscode.debug.startDebugging(undefined, {
+      "type": "lrdb",
+      "request": "attach",
+      "name": "Attach",
+      "host": hostname,
+      "port": port,
+      "sourceRoot": "${workspaceFolder}",
+    })
+  })
+
   // the debugger
   context.subscriptions.push(
     vscode.debug.registerDebugConfigurationProvider(

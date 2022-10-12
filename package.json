@@ -212,6 +212,16 @@
           "command": "lrdb.refreshVMList",
           "title": "Refresh",
           "icon": "$(refresh)"
+      },
+      {
+        "command": "lrdb.startDebugging",
+        "title": "Start Debugging",
+        "icon": "$(debug-alt)"
+      },
+      {
+        "command": "lrdb.toggleDebugging",
+        "title": "Toggle Debugging",
+        "icon": "$(debug-alt)"
       }
     ],
     "menus": {
