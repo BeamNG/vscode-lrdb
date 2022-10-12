@@ -2,7 +2,7 @@
 
 How to work on this VS Code extension :)
 
-# Architecture
+## Architecture
 
 This is a quick summary of how all of this is supposed to work together.
 
@@ -15,7 +15,7 @@ This is a quick summary of how all of this is supposed to work together.
 For more information about the VS Code side of things, please read [debugger-extension](https://code.visualstudio.com/api/extension-guides/debugger-extension). 
 
 
-# How to debug
+## How to debug
 
 This is quite complex, so be aware of the global picture before you try.
 
@@ -31,9 +31,3 @@ Please do not commit this change, it will break in production.
 
 3) Launch `Extension + Server`. Extension is the frontend, Server is your Debug adapter
 4) In the newly opened VS Code window, try to reproduce the crash or error, your exceptions should be logged.
-
-## Icon licensing
-
-[Lua icon](https://www.lua.org/images)
-
-[Search for virus (modified)](https://www.flaticon.com/free-icon/search-for-virus_95496)
