@@ -4,6 +4,7 @@ import * as path from 'path'
 import * as vscode from 'vscode'
 import * as net from 'net'
 import { LuaDebugSession } from './lrdbDebug'
+import { LuaInstancesTreeViewProvider } from './luaInstancesTreeViewProvider'
 
 // The compile time flag 'runMode' controls how the debug adapter is run.
 // Please note: the test suite only supports 'external' mode.
@@ -11,6 +12,15 @@ import { LuaDebugSession } from './lrdbDebug'
 const runMode: 'external' | 'server' | 'inline' = 'server'
 
 export function activate(context: vscode.ExtensionContext): void {
+
+  // the UI bits
+  const treeDataProvider = new LuaInstancesTreeViewProvider();
+  vscode.window.registerTreeDataProvider('availableLuaDebuggers', treeDataProvider);
+  vscode.commands.registerCommand('lrdb.refreshVMList', () =>
+    treeDataProvider.refreshCommand()
+  )
+
+  // the debugger
   context.subscriptions.push(
     vscode.debug.registerDebugConfigurationProvider(
       'lrdb',
@@ -39,7 +49,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
   if (factory) {
     context.subscriptions.push(
-      vscode.debug.registerDebugAdapterDescriptorFactory('LRDB', factory)
+      vscode.debug.registerDebugAdapterDescriptorFactory('lrdb', factory)
     )
 
     if ('dispose' in factory) {

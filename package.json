@@ -16,7 +16,8 @@
     "tree-kill": "^1.2.2"
   },
   "activationEvents": [
-    "onDebug"
+    "onDebug",
+    "onView:availableLuaDebuggers"
   ],
   "repository": {
     "type": "git",
@@ -191,6 +192,36 @@
           }
         }
       }
-    ]
+    ],
+    "views": {
+      "debug": [
+        {
+          "id": "availableLuaDebuggers",
+          "name": "Lua Remote Debugger - VMs"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "availableLuaDebuggers",
+        "contents": "No running Lua VM's found. Please start your Lua instance :)"
+      }
+    ],
+    "commands": [
+      {
+          "command": "lrdb.refreshVMList",
+          "title": "Refresh",
+          "icon": "$(refresh)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+          {
+              "command": "lrdb.refreshVMList",
+              "when": "view == availableLuaDebuggers",
+              "group": "navigation"
+          }
+      ]
+    }
   }
 }
