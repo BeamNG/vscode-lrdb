@@ -16,8 +16,8 @@ import { DebugProtocol } from '@vscode/debugprotocol'
 import { readFileSync } from 'fs'
 import { spawn, ChildProcess } from 'child_process'
 import * as path from 'path'
-import { LRDBAdapter, LRDBClient } from 'lrdb-debuggable-lua'
-import { JsonRpcNotify, JsonRpcRequest } from 'lrdb-debuggable-lua/dist/JsonRpc'
+import { LRDBAdapter, LRDBClient } from './debugger'
+import { JsonRpcNotify, JsonRpcRequest } from './debugger/JsonRpc'
 import {
   DebugRequest,
   EvalRequest,
@@ -27,7 +27,7 @@ import {
   GetUpvaluesRequest,
   PausedNotify,
   RunningNotify,
-} from 'lrdb-debuggable-lua/dist/Client'
+} from './debugger/Client'
 import * as treeKill from 'tree-kill'
 
 export interface LaunchRequestArguments
@@ -183,15 +183,12 @@ export class LuaDebugSession extends DebugSession {
     }
 
     if (response.body) {
-      // This debug adapter implements the configurationDoneRequest.
       response.body.supportsConfigurationDoneRequest = true
-
+      response.body.supportsFunctionBreakpoints = true
       response.body.supportsConditionalBreakpoints = true
-
       response.body.supportsHitConditionalBreakpoints = true
-
-      // make VS Code to use 'evaluate' when hovering over source
       response.body.supportsEvaluateForHovers = true
+      response.body.supportsSetVariable = true
     }
 
     this.sendResponse(response)
@@ -299,10 +296,11 @@ export class LuaDebugSession extends DebugSession {
     } catch(e) {
       response.success = false
       if (typeof e === "string") {
-        response.message = e
+        response.message = `Debug Adapter exception: ${e}`
       } else if (e instanceof Error) {
-        response.message = e.message
+        response.message = `Debug Adapter exception: ${e.message}`
       }
+      this.sendEvent(new OutputEvent(response.message + "\n"))
       this.sendResponse(response)      
     }
   }
@@ -319,6 +317,7 @@ export class LuaDebugSession extends DebugSession {
       const port = args.port ? args.port : 21111
       const host = args.host ? args.host : 'localhost'
 
+      this.sendEvent(new OutputEvent(`Debugger connecting to ${host}:${port} ...\n`))
       this._debug_client = new LRDBClient.Client(
         new LRDBAdapter.TcpAdapter(port, host)
       )
@@ -328,11 +327,12 @@ export class LuaDebugSession extends DebugSession {
       })
 
       this._debug_client.onClose.on(() => {
-        this.sendEvent(new OutputEvent(`Debugger disconnected`))
+        this.sendEvent(new OutputEvent(`Debugger disconnected.\n`))
         this.sendEvent(new TerminatedEvent())
       })
 
       this._debug_client.onOpen.on(() => {
+        this.sendEvent(new OutputEvent(`Debugger connected!\n`))
         this.sendEvent(new InitializedEvent())
       })
 
@@ -340,10 +340,11 @@ export class LuaDebugSession extends DebugSession {
     } catch(e) {
       response.success = false
       if (typeof e === "string") {
-        response.message = e
+        response.message = `Debug Adapter exception: ${e}`
       } else if (e instanceof Error) {
-        response.message = e.message
+        response.message = `Debug Adapter exception: ${e.message}`
       }
+      this.sendEvent(new OutputEvent(response.message + "\n"))
       this.sendResponse(response)      
     }
   }
@@ -420,10 +421,11 @@ export class LuaDebugSession extends DebugSession {
     } catch(e) {
       response.success = false
       if (typeof e === "string") {
-        response.message = e
+        response.message = `Debug Adapter exception: ${e}`
       } else if (e instanceof Error) {
-        response.message = e.message
+        response.message = `Debug Adapter exception: ${e.message}`
       }
+      this.sendEvent(new OutputEvent(response.message + "\n"))
       this.sendResponse(response)      
     }
   }
@@ -437,9 +439,6 @@ export class LuaDebugSession extends DebugSession {
     this.sendResponse(response)
   }
 
-  /**
-   * Returns a fake 'stacktrace' where every 'stackframe' is a word from the current line.
-   */
   protected stackTraceRequest(
     response: DebugProtocol.StackTraceResponse,
     args: DebugProtocol.StackTraceArguments
@@ -463,6 +462,8 @@ export class LuaDebugSession extends DebugSession {
           const frames = new Array<StackFrame>()
           for (let i = startFrame; i < endFrame; i++) {
             const frame = res.result[i] // use a word of the line as the stackframe name
+            if(frame.file === undefined) frame.file = ""
+            if(frame.func === undefined) frame.func = ""
             const filename = this.convertDebuggerPathToClient(frame.file)
             const source = new Source(frame.id, filename)
             if (!frame.file.startsWith('@')) {
@@ -494,10 +495,11 @@ export class LuaDebugSession extends DebugSession {
     } catch(e) {
       response.success = false
       if (typeof e === "string") {
-        response.message = e
+        response.message = `Debug Adapter exception: ${e}`
       } else if (e instanceof Error) {
-        response.message = e.message
+        response.message = `Debug Adapter exception: ${e.message}`
       }
+      this.sendEvent(new OutputEvent(response.message + "\n"))
       this.sendResponse(response)      
     }
   }
@@ -546,10 +548,11 @@ export class LuaDebugSession extends DebugSession {
     } catch(e) {
       response.success = false
       if (typeof e === "string") {
-        response.message = e
+        response.message = `Debug Adapter exception: ${e}`
       } else if (e instanceof Error) {
-        response.message = e.message
+        response.message = `Debug Adapter exception: ${e.message}`
       }
+      this.sendEvent(new OutputEvent(response.message + "\n"))
       this.sendResponse(response)      
     }
   }
@@ -607,10 +610,11 @@ export class LuaDebugSession extends DebugSession {
     } catch(e) {
       response.success = false
       if (typeof e === "string") {
-        response.message = e
+        response.message = `Debug Adapter exception: ${e}`
       } else if (e instanceof Error) {
-        response.message = e.message
+        response.message = `Debug Adapter exception: ${e.message}`
       }
+      this.sendEvent(new OutputEvent(response.message + "\n"))
       this.sendResponse(response)      
     }
   }
@@ -686,10 +690,11 @@ export class LuaDebugSession extends DebugSession {
     } catch(e) {
       response.success = false
       if (typeof e === "string") {
-        response.message = e
+        response.message = `Debug Adapter exception: ${e}`
       } else if (e instanceof Error) {
-        response.message = e.message
+        response.message = `Debug Adapter exception: ${e.message}`
       }
+      this.sendEvent(new OutputEvent(response.message + "\n"))
       this.sendResponse(response)      
     }
   }
@@ -704,10 +709,11 @@ export class LuaDebugSession extends DebugSession {
     } catch(e) {
       response.success = false
       if (typeof e === "string") {
-        response.message = e
+        response.message = `Debug Adapter exception: ${e}`
       } else if (e instanceof Error) {
-        response.message = e.message
+        response.message = `Debug Adapter exception: ${e.message}`
       }
+      this.sendEvent(new OutputEvent(response.message + "\n"))
       this.sendResponse(response)      
     }
   }
@@ -722,10 +728,11 @@ export class LuaDebugSession extends DebugSession {
     } catch(e) {
       response.success = false
       if (typeof e === "string") {
-        response.message = e
+        response.message = `Debug Adapter exception: ${e}`
       } else if (e instanceof Error) {
-        response.message = e.message
+        response.message = `Debug Adapter exception: ${e.message}`
       }
+      this.sendEvent(new OutputEvent(response.message + "\n"))
       this.sendResponse(response)      
     }
   }
@@ -740,10 +747,11 @@ export class LuaDebugSession extends DebugSession {
     } catch(e) {
       response.success = false
       if (typeof e === "string") {
-        response.message = e
+        response.message = `Debug Adapter exception: ${e}`
       } else if (e instanceof Error) {
-        response.message = e.message
+        response.message = `Debug Adapter exception: ${e.message}`
       }
+      this.sendEvent(new OutputEvent(response.message + "\n"))
       this.sendResponse(response)      
     }
   }
@@ -758,10 +766,11 @@ export class LuaDebugSession extends DebugSession {
     } catch(e) {
       response.success = false
       if (typeof e === "string") {
-        response.message = e
+        response.message = `Debug Adapter exception: ${e}`
       } else if (e instanceof Error) {
-        response.message = e.message
+        response.message = `Debug Adapter exception: ${e.message}`
       }
+      this.sendEvent(new OutputEvent(response.message + "\n"))
       this.sendResponse(response)      
     }
   }
@@ -776,10 +785,11 @@ export class LuaDebugSession extends DebugSession {
     } catch(e) {
       response.success = false
       if (typeof e === "string") {
-        response.message = e
+        response.message = `Debug Adapter exception: ${e}`
       } else if (e instanceof Error) {
-        response.message = e.message
+        response.message = `Debug Adapter exception: ${e.message}`
       }
+      this.sendEvent(new OutputEvent(response.message + "\n"))
       this.sendResponse(response)      
     }
   }
@@ -800,10 +810,11 @@ export class LuaDebugSession extends DebugSession {
     } catch(e) {
       response.success = false
       if (typeof e === "string") {
-        response.message = e
+        response.message = `Debug Adapter exception: ${e}`
       } else if (e instanceof Error) {
-        response.message = e.message
+        response.message = `Debug Adapter exception: ${e.message}`
       }
+      this.sendEvent(new OutputEvent(response.message + "\n"))
       this.sendResponse(response)      
     }
   }
@@ -830,10 +841,11 @@ export class LuaDebugSession extends DebugSession {
     } catch(e) {
       response.success = false
       if (typeof e === "string") {
-        response.message = e
+        response.message = `Debug Adapter exception: ${e}`
       } else if (e instanceof Error) {
-        response.message = e.message
+        response.message = `Debug Adapter exception: ${e.message}`
       }
+      this.sendEvent(new OutputEvent(response.message + "\n"))
       this.sendResponse(response)      
     }
   }
@@ -901,10 +913,11 @@ export class LuaDebugSession extends DebugSession {
     } catch(e) {
       response.success = false
       if (typeof e === "string") {
-        response.message = e
+        response.message = `Debug Adapter exception: ${e}`
       } else if (e instanceof Error) {
-        response.message = e.message
+        response.message = `Debug Adapter exception: ${e.message}`
       }
+      this.sendEvent(new OutputEvent(response.message + "\n"))
       this.sendResponse(response)      
     }
   }
@@ -949,10 +962,14 @@ export class LuaDebugSession extends DebugSession {
       }
     } catch(e) {
       if (typeof e === "string") {
-        this.sendEvent(new OutputEvent(e))
+        this.sendEvent(new OutputEvent(`Debug Adapter exception: ${e}\n`))
       } else if (e instanceof Error) {
         this.sendEvent(new OutputEvent(e.message))
       }
     }
+  }
+
+  protected setVariableRequest(response: DebugProtocol.SetVariableResponse, args: DebugProtocol.SetVariableArguments, request?: DebugProtocol.Request): void {
+    console.log("args");
   }
 }

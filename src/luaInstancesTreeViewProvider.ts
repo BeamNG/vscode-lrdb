@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import { LRDBAdapter, LRDBClient } from 'lrdb-debuggable-lua';
+import { LRDBAdapter, LRDBClient } from './debugger';
 import { ConnectedNotify } from './lrdbDebug';
 import { DebugSession } from '@vscode/debugadapter';
 
@@ -103,7 +103,7 @@ class LuaRemoteDebuggerInstance extends vscode.TreeItem {
   refreshUI(): void {
     this.iconPath = (this.debugSession !== undefined) ? new vscode.ThemeIcon('close-all') : new vscode.ThemeIcon('debug-alt')
     this.label = this.hostname + ':' + this.port.toString() + " - " + this.vmType + ((this.debugSession !== undefined) ? " [active]" : "");
-    this.tooltip = this.hostname + this.port.toString() + '\n' + this.productName + '\n' + this.productVersion + '\n' + this.vmType + '\n' + this.luaVersion + '\n' + (this.shipping ? "shipping" : "")
+    this.tooltip = this.hostname + ':' + this.port.toString() + '\n' + this.productName + '\n' + this.productVersion + '\n' + this.vmType + '\n' + this.luaVersion + '\n' + (this.shipping ? "shipping" : "")
     this.tree.refresh();
   }
 
