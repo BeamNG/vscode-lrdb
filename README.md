@@ -2,9 +2,7 @@
 
 ## Introduction
 
-This extension allows debugging Lua code and using the Source engine console
-of Lua clients or SRCDS (SouRCe Dedicated Server) instances,
-through Visual Studio Code.
+This extension allows debugging embedded Lua VMs through Visual Studio Code.
 
 This works by running a [remote debugging server](https://github.com/danielga/gm_rdb)
 on SRCDS listening on a port. The VSCode extension is then used to attach a
@@ -13,11 +11,12 @@ debugger to provide breakpoints.
 This fork works only with the Lua module
 [danielga/gm_rdb](https://github.com/danielga/gm_rdb).
 
-Based on the work from
-[satoren/vscode-lrdb](https://github.com/satoren/vscode-lrdb) and
-[kapecp/vscode-lrdb](https://github.com/kapecp/vscode-lrdb).
+Based on the work from:
+- [danielga/vscode-gmrdb](https://github.com/danielga/vscode-gmrdb)
+- [satoren/vscode-lrdb](https://github.com/satoren/vscode-lrdb)
+- [kapecp/vscode-lrdb](https://github.com/kapecp/vscode-lrdb)
 
-![Lua debug](https://raw.githubusercontent.com/danielga/vscode-lrdb/master/images/gmrdb.gif)
+![Lua debug](images/demo.gif)
 
 ## Features
 
@@ -32,8 +31,9 @@ Based on the work from
 
 ## Requirements
 
-- [Lua Remote Debugger binary modules](https://github.com/danielga/gm_rdb/releases)
-- SRCDS 32-bit or 64-bit
+One of those lua Remote Debugger:
+- [Garry's Mod Lua Remote Debugger](https://github.com/danielga/gm_rdb/releases)
+- [Lua Remote Debugger](https://github.com/satoren/vscode-lrdb)
 
 ## Usage
 
@@ -170,36 +170,6 @@ Feel free to use variables like `workspaceFolder` to specify paths as a shortcut
   ]
 }
 ```
-
-# Architecture
-
-This is a quick summary of how all of this is supposed to work together.
-
-- The embedded Lua is compiled with custom debug extensions: see `scripting/debugger`. This is the debugger for lua and it is opening a TCP server and listen for debuggers to attach to.
-
-- VS Code is having two components that it needs to take care of:
-  - the extension via [extension.ts](src/extension.ts) that manages the session on the VS Code side
-  - the Debug adapter which relays messages from the VS Code frontend to the C++ server backend.
-
-For more information about the VS Code side of things, please read [debugger-extension](https://code.visualstudio.com/api/extension-guides/debugger-extension). 
-
-
-# How to debug
-
-This is quite complex, so be aware of the global picture before you try.
-
-1) Open this folder as workspace in VS Code
-2) Change code to force VS Code to run the debugger adapter in server mode, so you can actually see what's going on. If you do not do this, a separate instance is started no matter if you start one. You'll not see the xceptions and breakpoints will not work.
-
-in [extension.ts](src/extension.ts) around line 11, change the `runMode` to `server` like this:
-```ts
-const runMode: 'external' | 'server' | 'inline' = 'server'
-```
-Please do not commit this change, it will break in production.
-
-
-3) Launch `Extension + Server`. Extension is the frontend, Server is your Debug adapter
-4) In the newly opened VS Code window, try to reproduce the crash or error, your exceptions should be logged.
 
 ## Icon licensing
 
