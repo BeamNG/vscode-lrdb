@@ -1,4 +1,4 @@
-# Lua Remote DeBugger for Visual Studio Code
+# Lua Remote Debugger for Visual Studio Code
 
 How to work on this VS Code extension :)
 
