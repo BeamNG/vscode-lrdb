@@ -282,6 +282,7 @@ export interface SetVarRequest extends JsonRpcRequest {
   method: 'set_var'
   params: {
     scope: string
+    stackNo: number
     name: string
     value: number | string | boolean
   }

@@ -980,10 +980,20 @@ export class LuaDebugSession extends DebugSession {
 
       const parent = this._variableHandles.get(args.variablesReference)
       let varScope = 'local'
+      let stackNo = 0
       if (parent != null) {
-        if(parent.type === 'get_local_variable') varScope = 'local'
-        else if(parent.type === 'get_upvalues') varScope = 'up'
-        else if(parent.type === 'get_global') varScope = 'global'
+        if(parent.type === 'get_local_variable') {
+          varScope = 'local'
+          let lp = parent.params as GetLocalVariableRequest['params']
+          if(lp.stack_no)  stackNo = lp.stack_no
+        } else if(parent.type === 'get_upvalues') {
+          varScope = 'up'
+          let lp = parent.params as GetUpvaluesRequest['params']
+          if(lp.stack_no)  stackNo = lp.stack_no
+        } else if(parent.type === 'get_global') {
+          varScope = 'global'
+        }
+
       }
 
       let value: string | number | boolean = args.value;
@@ -996,10 +1006,12 @@ export class LuaDebugSession extends DebugSession {
         value = Number(value)
       }
 
+
       const params: SetVarRequest['params'] = {
         name: args.name,
         value: value,
-        scope: varScope
+        scope: varScope,
+        stackNo: stackNo
       }
       this._debug_client.setVar(params).then((res) => {
         response.success = res.result
