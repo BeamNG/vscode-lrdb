@@ -4,7 +4,7 @@ Allows debugging embedded Lua VMs through Visual Studio Code.
 
 ![Lua debug](images/demo.gif)
 
-Please also see the [developer docs](Readme_devs.md) if you want to work on it.
+Please also see the [developer docs](Readme_dev.md) if you want to work on it.
 
 ## Features
 
