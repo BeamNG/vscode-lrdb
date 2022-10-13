@@ -124,6 +124,8 @@ function stringify(value: unknown): string {
     return 'nil'
   } else if (value == undefined) {
     return 'none'
+  } else if (typeof value === 'string') { // prevent putting quotes around the value
+    return value
   } else {
     return JSON.stringify(value)
   }

@@ -31,3 +31,13 @@ Please do not commit this change, it will break in production.
 
 3) Launch `Extension + Server`. Extension is the frontend, Server is your Debug adapter
 4) In the newly opened VS Code window, try to reproduce the crash or error, your exceptions should be logged.
+
+## Publishing
+
+1) Please read the [offical guideline](https://code.visualstudio.com/api/working-with-extensions/publishing-extension)
+2) Log into the marketplace mgmt https://marketplace.visualstudio.com/manage/publishers/beamng
+
+```
+npm install -g vsce
+vsce package
+```
