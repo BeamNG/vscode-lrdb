@@ -1,8 +1,8 @@
 {
   "name": "lrdb-beamng",
   "displayName": "lrdb-beamng",
-  "description": "Lua Remote DeBugger",
-  "version": "0.5.2",
+  "description": "Lua Remote Debugger",
+  "version": "0.5.3",
   "publisher": "BeamNG",
   "engines": {
     "vscode": "^1.67.0"

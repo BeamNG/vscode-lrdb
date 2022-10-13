@@ -16,6 +16,8 @@ Please also see the [developer docs](Readme_devs.md) if you want to work on it.
 - Watch window
 - Evaluate expressions
 - Remote debugging over TCP
+- Multiple debug sessions possible at the same time
+- New view in debug: Available debug sessions:![Session view](images/session-overview.png)
 
 ## Requirements
 
