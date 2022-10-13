@@ -35,9 +35,11 @@ Please do not commit this change, it will break in production.
 ## Publishing
 
 1) Please read the [offical guideline](https://code.visualstudio.com/api/working-with-extensions/publishing-extension)
-2) Log into the marketplace mgmt https://marketplace.visualstudio.com/manage/publishers/beamng
-
+2) Package it:
 ```
 npm install -g vsce
 vsce package
 ```
+
+3) Log into the [marketplace backend](https://marketplace.visualstudio.com/manage)
+3) Update the extension by uploading the `.vsix` file

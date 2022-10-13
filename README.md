@@ -12,7 +12,7 @@ Please also see the [developer docs](Readme_devs.md) if you want to work on it.
 - Add/remove breakpoints
 - Conditional breakpoints
 - Continue, pause, step over, step in, step out
-- Local, global, \_ENV, upvalue variables and arguments
+- View and modify Local, global, \_ENV, upvalue variables and arguments
 - Watch window
 - Evaluate expressions
 - Remote debugging over TCP
