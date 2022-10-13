@@ -17,7 +17,10 @@ Please also see the [developer docs](Readme_devs.md) if you want to work on it.
 - Evaluate expressions
 - Remote debugging over TCP
 - Multiple debug sessions possible at the same time
-- New view in debug: Available debug sessions:![Session view](images/session-overview.png)
+- New view in debug: `Lua Remote Debugger - VMs`.
+ This is polling the ports from 21110 to 21120 on localhost to find any actively running session.
+
+![Session view](images/session-overview.png)
 
 ## Requirements
 
