@@ -76,7 +76,7 @@ type VariableReference =
 
 export interface ConnectedNotify extends JsonRpcNotify {
   method: 'connected'
-  params: { 
+  params: {
     lua?: {
       version?: string
       productName?: string
@@ -119,6 +119,32 @@ interface CommandRequest extends JsonRpcRequest {
   params: string
 }
 
+function getStringifiableObject(value: any): any {
+  if (value == null) {
+    return 'nil'
+  } else if (value == undefined) {
+    return 'none'
+  } else if (typeof value === 'string') { // prevent putting quotes around the value
+    return value
+  } else if ((value instanceof Array)) {
+    const newArr: Array<any> = []
+    for (let i = 0; i < value.length; i++){
+      newArr.push(getStringifiableObject(value[i]))
+    }
+    return newArr
+  } else if (typeof value === 'object') {
+    const newObj: any = {}
+    const arrData = value['key']
+    for (let i = 0; i < arrData.length - 1; i += 2){
+      newObj[stringify(arrData[i])] = getStringifiableObject(arrData[i + 1])
+    }
+    return newObj
+  }
+  else {
+    return JSON.stringify(value)
+  }
+}
+
 function stringify(value: unknown): string {
   if (value == null) {
     return 'nil'
@@ -126,6 +152,8 @@ function stringify(value: unknown): string {
     return 'none'
   } else if (typeof value === 'string') { // prevent putting quotes around the value
     return value
+  } else if (typeof value === 'object') {
+    return JSON.stringify(getStringifiableObject(value))
   } else {
     return JSON.stringify(value)
   }
@@ -304,7 +332,7 @@ export class LuaDebugSession extends DebugSession {
         response.message = `Debug Adapter exception: ${e.message}`
       }
       this.sendEvent(new OutputEvent(response.message + "\n"))
-      this.sendResponse(response)      
+      this.sendResponse(response)
     }
   }
 
@@ -348,7 +376,7 @@ export class LuaDebugSession extends DebugSession {
         response.message = `Debug Adapter exception: ${e.message}`
       }
       this.sendEvent(new OutputEvent(response.message + "\n"))
-      this.sendResponse(response)      
+      this.sendResponse(response)
     }
   }
 
@@ -429,7 +457,7 @@ export class LuaDebugSession extends DebugSession {
         response.message = `Debug Adapter exception: ${e.message}`
       }
       this.sendEvent(new OutputEvent(response.message + "\n"))
-      this.sendResponse(response)      
+      this.sendResponse(response)
     }
   }
 
@@ -503,7 +531,7 @@ export class LuaDebugSession extends DebugSession {
         response.message = `Debug Adapter exception: ${e.message}`
       }
       this.sendEvent(new OutputEvent(response.message + "\n"))
-      this.sendResponse(response)      
+      this.sendResponse(response)
     }
   }
 
@@ -556,7 +584,7 @@ export class LuaDebugSession extends DebugSession {
         response.message = `Debug Adapter exception: ${e.message}`
       }
       this.sendEvent(new OutputEvent(response.message + "\n"))
-      this.sendResponse(response)      
+      this.sendResponse(response)
     }
   }
 
@@ -618,7 +646,7 @@ export class LuaDebugSession extends DebugSession {
         response.message = `Debug Adapter exception: ${e.message}`
       }
       this.sendEvent(new OutputEvent(response.message + "\n"))
-      this.sendResponse(response)      
+      this.sendResponse(response)
     }
   }
 
@@ -628,7 +656,7 @@ export class LuaDebugSession extends DebugSession {
     parent: VariableReference
   ): void {
     try {
-      const evalParam = (k: string | number): EvalParam => {
+      const evalParam = (k: any): EvalParam => {
         switch (parent.type) {
           case 'eval': {
             const key = typeof k === 'string' ? `"${k}"` : `${k}`
@@ -670,18 +698,24 @@ export class LuaDebugSession extends DebugSession {
             variablesReference: varRef,
           })
         })
-      } else if (typeof variablesData === 'object') {
-        const varData = variablesData as Record<string, any>
-        for (const k in varData) {
-          const typename = typeof varData[k]
-          const varRef =
-            typename === 'object' ? this._variableHandles.create(evalParam(k)) : 0
-          variables.push({
-            name: k,
-            type: typename,
-            value: stringify(varData[k]),
-            variablesReference: varRef,
-          })
+      }
+      else if (typeof variablesData === 'object') {
+        if (variablesData !== null && variablesData !== undefined && 'key' in variablesData) {
+          const arrData = (variablesData as {key: Array<object>}).key
+
+          for (let i = 0; i < arrData.length - 1; i += 2){
+            const key = arrData[i]
+            const val = arrData[i + 1]
+
+            const typename = typeof val
+            const varRef = typename === 'object' ? this._variableHandles.create(evalParam(key)) : 0
+            variables.push({
+              name: `${key}`,
+              type: typename,
+              value: stringify(val),
+              variablesReference: varRef,
+            })
+          }
         }
       }
 
@@ -698,7 +732,7 @@ export class LuaDebugSession extends DebugSession {
         response.message = `Debug Adapter exception: ${e.message}`
       }
       this.sendEvent(new OutputEvent(response.message + "\n"))
-      this.sendResponse(response)      
+      this.sendResponse(response)
     }
   }
 
@@ -717,7 +751,7 @@ export class LuaDebugSession extends DebugSession {
         response.message = `Debug Adapter exception: ${e.message}`
       }
       this.sendEvent(new OutputEvent(response.message + "\n"))
-      this.sendResponse(response)      
+      this.sendResponse(response)
     }
   }
 
@@ -736,7 +770,7 @@ export class LuaDebugSession extends DebugSession {
         response.message = `Debug Adapter exception: ${e.message}`
       }
       this.sendEvent(new OutputEvent(response.message + "\n"))
-      this.sendResponse(response)      
+      this.sendResponse(response)
     }
   }
 
@@ -755,7 +789,7 @@ export class LuaDebugSession extends DebugSession {
         response.message = `Debug Adapter exception: ${e.message}`
       }
       this.sendEvent(new OutputEvent(response.message + "\n"))
-      this.sendResponse(response)      
+      this.sendResponse(response)
     }
   }
 
@@ -774,7 +808,7 @@ export class LuaDebugSession extends DebugSession {
         response.message = `Debug Adapter exception: ${e.message}`
       }
       this.sendEvent(new OutputEvent(response.message + "\n"))
-      this.sendResponse(response)      
+      this.sendResponse(response)
     }
   }
 
@@ -793,7 +827,7 @@ export class LuaDebugSession extends DebugSession {
         response.message = `Debug Adapter exception: ${e.message}`
       }
       this.sendEvent(new OutputEvent(response.message + "\n"))
-      this.sendResponse(response)      
+      this.sendResponse(response)
     }
   }
 
@@ -818,7 +852,7 @@ export class LuaDebugSession extends DebugSession {
         response.message = `Debug Adapter exception: ${e.message}`
       }
       this.sendEvent(new OutputEvent(response.message + "\n"))
-      this.sendResponse(response)      
+      this.sendResponse(response)
     }
   }
 
@@ -849,7 +883,7 @@ export class LuaDebugSession extends DebugSession {
         response.message = `Debug Adapter exception: ${e.message}`
       }
       this.sendEvent(new OutputEvent(response.message + "\n"))
-      this.sendResponse(response)      
+      this.sendResponse(response)
     }
   }
 
@@ -921,7 +955,7 @@ export class LuaDebugSession extends DebugSession {
         response.message = `Debug Adapter exception: ${e.message}`
       }
       this.sendEvent(new OutputEvent(response.message + "\n"))
-      this.sendResponse(response)      
+      this.sendResponse(response)
     }
   }
 
@@ -1033,7 +1067,7 @@ export class LuaDebugSession extends DebugSession {
         response.message = `Debug Adapter exception: ${e.message}`
       }
       this.sendEvent(new OutputEvent(response.message + "\n"))
-      this.sendResponse(response)      
+      this.sendResponse(response)
     }
   }
 }
