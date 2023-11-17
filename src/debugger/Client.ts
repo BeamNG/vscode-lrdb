@@ -9,6 +9,7 @@ import {
 } from './JsonRpc'
 
 export type DebugRequest =
+  | InitRequest
   | StepRequest
   | StepInRequest
   | StepOutRequest
@@ -83,6 +84,16 @@ export class Client {
       }
     })
   }
+
+  init = (
+    params: InitRequest['params']
+  ): Promise<DebugResponseType<InitRequest>> =>
+    this.send({
+      method: 'init',
+      jsonrpc: '2.0',
+      id: this.seqId++,
+      params,
+    })
 
   step = (): Promise<DebugResponseType<StepRequest>> =>
     this.send({ method: 'step', jsonrpc: '2.0', id: this.seqId++ })
@@ -209,6 +220,12 @@ export interface RunningNotify extends JsonRpcNotify {
   params?: never
 }
 
+export interface InitRequest extends JsonRpcRequest {
+  method: 'init'
+  params: {
+    protocol_version: string
+  }
+}
 interface StepRequest extends JsonRpcRequest {
   method: 'step'
   params?: never
@@ -310,6 +327,7 @@ type Breakpoint = {
 }
 
 type ResponseResultType = {
+  init: never
   get_stacktrace: StackInfo[]
   get_local_variable: Record<string, unknown>
   get_upvalues: Record<string, unknown>

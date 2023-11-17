@@ -177,6 +177,8 @@ export class LuaDebugSession extends DebugSession {
   // Lua
   private static THREAD_ID = 1
 
+  private static DEBUGGER_PROTOCOL_VERSION = '3'
+
   private _debug_server_process?: ChildProcess
 
   private _debug_client?: LRDBClient.Client
@@ -194,7 +196,7 @@ export class LuaDebugSession extends DebugSession {
 
   private _working_directory?: string
 
-  private _protocol_version?: string
+  private _debuggee_protocol_version?: string
 
   /**
    * Creates a new debug adapter that is used for one debug session.
@@ -327,6 +329,10 @@ export class LuaDebugSession extends DebugSession {
       })
 
       this._debug_client.onOpen.on(() => {
+        const data = {
+          protocol_version: LuaDebugSession.DEBUGGER_PROTOCOL_VERSION,
+        }
+        this._debug_client?.init(data)
         this.sendEvent(new InitializedEvent())
       })
 
@@ -380,6 +386,10 @@ export class LuaDebugSession extends DebugSession {
 
       this._debug_client.onOpen.on(() => {
         this.sendEvent(new OutputEvent(`Debugger connected!\n`))
+        const data = {
+          protocol_version: LuaDebugSession.DEBUGGER_PROTOCOL_VERSION,
+        }
+        this._debug_client?.init(data)
         this.sendEvent(new InitializedEvent())
       })
 
@@ -702,7 +712,7 @@ export class LuaDebugSession extends DebugSession {
 
       const variables: DebugProtocol.Variable[] = []
       if (variablesData instanceof Array) {
-        if (this._protocol_version == '2') {
+        if (this._debuggee_protocol_version == '2') {
           variablesData.forEach((v, i) => {
             const typename = typeof v
             const k = i + 1
@@ -731,7 +741,7 @@ export class LuaDebugSession extends DebugSession {
         }
       }
       else if (typeof variablesData === 'object') {
-        if (this._protocol_version == '2') {
+        if (this._debuggee_protocol_version == '2') {
           const varData = variablesData as Record<string, any>
           for (const k in varData) {
             const typename = typeof varData[k]
@@ -966,7 +976,7 @@ export class LuaDebugSession extends DebugSession {
       this._debug_client.eval(requestParam).then((res) => {
         if (res.result instanceof Array) {
           let ret = ''
-          if (this._protocol_version == '2') {
+          if (this._debuggee_protocol_version == '2') {
               ret = res.result.map((v) => stringify_v2(v)).join('\t')
           } else {
               ret = res.result.map((v) => stringify_v3(v)).join('\t')
@@ -1037,7 +1047,7 @@ export class LuaDebugSession extends DebugSession {
 
         case 'connected':
           this._working_directory = event.params.working_directory
-          this._protocol_version = event.params.protocol_version
+          this._debuggee_protocol_version = event.params.protocol_version
           break
 
         case 'output':
