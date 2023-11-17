@@ -84,7 +84,8 @@ export interface ConnectedNotify extends JsonRpcNotify {
       shipping?: boolean
       vmType?: string
     },
-    working_directory?: string
+    working_directory?: string,
+    protocol_version?: string
   }
 }
 
@@ -136,16 +137,29 @@ function getStringifiableObject(value: any): any {
     const newObj: any = {}
     const arrData = value['key']
     for (let i = 0; i < arrData.length - 1; i += 2){
-      newObj[stringify(arrData[i])] = getStringifiableObject(arrData[i + 1])
+      newObj[stringify_v3(arrData[i])] = getStringifiableObject(arrData[i + 1])
     }
     return newObj
-  }
-  else {
+  } else {
     return JSON.stringify(value)
   }
 }
 
-function stringify(value: unknown): string {
+// protocol_version 2
+function stringify_v2(value: unknown): string {
+  if (value == null) {
+    return 'nil'
+  } else if (value == undefined) {
+    return 'none'
+  } else if (typeof value === 'string') { // prevent putting quotes around the value
+    return value
+  } else {
+    return JSON.stringify(value)
+  }
+}
+
+// protocol_version 3
+function stringify_v3(value: unknown): string {
   if (value == null) {
     return 'nil'
   } else if (value == undefined) {
@@ -179,6 +193,8 @@ export class LuaDebugSession extends DebugSession {
   private _stopOnEntry?: boolean
 
   private _working_directory?: string
+
+  private _protocol_version?: string
 
   /**
    * Creates a new debug adapter that is used for one debug session.
@@ -686,35 +702,65 @@ export class LuaDebugSession extends DebugSession {
 
       const variables: DebugProtocol.Variable[] = []
       if (variablesData instanceof Array) {
-        variablesData.forEach((v, i) => {
-          const typename = typeof v
-          const k = i + 1
-          const varRef =
-            typename === 'object' ? this._variableHandles.create(evalParam(k)) : 0
-          variables.push({
-            name: `${k}`,
-            type: typename,
-            value: stringify(v),
-            variablesReference: varRef,
-          })
-        })
-      }
-      else if (typeof variablesData === 'object') {
-        if (variablesData !== null && variablesData !== undefined && 'key' in variablesData) {
-          const arrData = (variablesData as {key: Array<object>}).key
-
-          for (let i = 0; i < arrData.length - 1; i += 2){
-            const key = arrData[i]
-            const val = arrData[i + 1]
-
-            const typename = typeof val
-            const varRef = typename === 'object' ? this._variableHandles.create(evalParam(key)) : 0
+        if (this._protocol_version == '2') {
+          variablesData.forEach((v, i) => {
+            const typename = typeof v
+            const k = i + 1
+            const varRef =
+              typename === 'object' ? this._variableHandles.create(evalParam(k)) : 0
             variables.push({
-              name: `${key}`,
+              name: `${k}`,
               type: typename,
-              value: stringify(val),
+              value: stringify_v2(v),
               variablesReference: varRef,
             })
+          })
+        } else {
+          variablesData.forEach((v, i) => {
+            const typename = typeof v
+            const k = i + 1
+            const varRef =
+              typename === 'object' ? this._variableHandles.create(evalParam(k)) : 0
+            variables.push({
+              name: `${k}`,
+              type: typename,
+              value: stringify_v3(v),
+              variablesReference: varRef,
+            })
+          })
+        }
+      }
+      else if (typeof variablesData === 'object') {
+        if (this._protocol_version == '2') {
+          const varData = variablesData as Record<string, any>
+          for (const k in varData) {
+            const typename = typeof varData[k]
+            const varRef =
+              typename === 'object' ? this._variableHandles.create(evalParam(k)) : 0
+            variables.push({
+              name: k,
+              type: typename,
+              value: stringify_v2(varData[k]),
+              variablesReference: varRef,
+            })
+          }
+        } else {
+          if (variablesData !== null && variablesData !== undefined && 'key' in variablesData) {
+            const arrData = (variablesData as {key: Array<object>}).key
+
+            for (let i = 0; i < arrData.length - 1; i += 2){
+              const key = arrData[i]
+              const val = arrData[i + 1]
+
+              const typename = typeof val
+              const varRef = typename === 'object' ? this._variableHandles.create(evalParam(key)) : 0
+              variables.push({
+                name: `${key}`,
+                type: typename,
+                value: stringify_v3(val),
+                variablesReference: varRef,
+              })
+            }
           }
         }
       }
@@ -919,7 +965,12 @@ export class LuaDebugSession extends DebugSession {
       }
       this._debug_client.eval(requestParam).then((res) => {
         if (res.result instanceof Array) {
-          const ret = res.result.map((v) => stringify(v)).join('\t')
+          let ret = ''
+          if (this._protocol_version == '2') {
+              ret = res.result.map((v) => stringify_v2(v)).join('\t')
+          } else {
+              ret = res.result.map((v) => stringify_v3(v)).join('\t')
+          }
           let varRef = 0
           if (res.result.length == 1) {
             const refobj = res.result[0]
@@ -986,6 +1037,7 @@ export class LuaDebugSession extends DebugSession {
 
         case 'connected':
           this._working_directory = event.params.working_directory
+          this._protocol_version = event.params.protocol_version
           break
 
         case 'output':
