@@ -15,12 +15,19 @@ This is a quick summary of how all of this is supposed to work together.
 For more information about the VS Code side of things, please read [debugger-extension](https://code.visualstudio.com/api/extension-guides/debugger-extension). 
 
 
+## Prerequisites
+
+### Windows
+
+1) Install [Node.js](https://nodejs.org/en/download/current)
+
 ## How to debug
 
 This is quite complex, so be aware of the global picture before you try.
 
 1) Open this folder as workspace in VS Code
-2) Change code to force VS Code to run the debugger adapter in server mode, so you can actually see what's going on. If you do not do this, a separate instance is started no matter if you start one. You'll not see the xceptions and breakpoints will not work.
+2) run `npm i`
+3) Change code to force VS Code to run the debugger adapter in server mode, so you can actually see what's going on. If you do not do this, a separate instance is started no matter if you start one. You'll not see the xceptions and breakpoints will not work.
 
 in [extension.ts](src/extension.ts) around line 11, change the `runMode` to `server` like this:
 ```ts
@@ -28,9 +35,9 @@ const runMode: 'external' | 'server' | 'inline' = 'server'
 ```
 Please do not commit this change, it will break in production.
 
-
-3) Launch `Extension + Server`. Extension is the frontend, Server is your Debug adapter
-4) In the newly opened VS Code window, try to reproduce the crash or error, your exceptions should be logged.
+4) On the left side of VS Code, switch to the "Run and Debug" Tab
+5) Launch `Extension + Server`. Extension is the frontend, Server is your Debug adapter
+6) In the newly opened VS Code window, try to reproduce the crash or error, your exceptions should be logged.
 
 ## Publishing
 

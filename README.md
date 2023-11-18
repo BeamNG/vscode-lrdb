@@ -4,8 +4,6 @@ Allows debugging embedded Lua VMs through Visual Studio Code.
 
 ![Lua debug](images/demo.gif)
 
-Please also see the [developer docs](Readme_dev.md) if you want to work on it.
-
 ## Features
 
 - Supports Windows, macOS and Linux
@@ -35,6 +33,10 @@ Start the debugger server in your embedded Lua, then attach VS Code to it.
 How to use:
 - in [BeamNG](Readme_BeamNG.md)
 - in [Garry's Mod](Readme_GM.md)
+
+## Development
+
+Please see the [developer docs](Readme_dev.md) if you want to work on this
 
 # Credits
 
