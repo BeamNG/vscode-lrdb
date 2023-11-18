@@ -712,7 +712,7 @@ export class LuaDebugSession extends DebugSession {
 
       const variables: DebugProtocol.Variable[] = []
       if (variablesData instanceof Array) {
-        if (this._debuggee_protocol_version == '2') {
+        if (this._debuggee_protocol_version === '2') {
           variablesData.forEach((v, i) => {
             const typename = typeof v
             const k = i + 1
@@ -741,7 +741,7 @@ export class LuaDebugSession extends DebugSession {
         }
       }
       else if (typeof variablesData === 'object') {
-        if (this._debuggee_protocol_version == '2') {
+        if (this._debuggee_protocol_version === '2') {
           const varData = variablesData as Record<string, any>
           for (const k in varData) {
             const typename = typeof varData[k]
@@ -976,7 +976,7 @@ export class LuaDebugSession extends DebugSession {
       this._debug_client.eval(requestParam).then((res) => {
         if (res.result instanceof Array) {
           let ret = ''
-          if (this._debuggee_protocol_version == '2') {
+          if (this._debuggee_protocol_version === '2') {
               ret = res.result.map((v) => stringify_v2(v)).join('\t')
           } else {
               ret = res.result.map((v) => stringify_v3(v)).join('\t')
