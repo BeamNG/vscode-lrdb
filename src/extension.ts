@@ -9,7 +9,7 @@ import { LuaInstancesTreeViewProvider } from './luaInstancesTreeViewProvider'
 // The compile time flag 'runMode' controls how the debug adapter is run.
 // Please note: the test suite only supports 'external' mode.
 // 'inline' mode is great for debugging.
-const runMode: 'external' | 'server' | 'inline' = 'external'
+const runMode: 'external' | 'server' | 'inline' = 'server'
 
 export function activate(context: vscode.ExtensionContext): void {
 

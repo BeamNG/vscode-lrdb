@@ -76,7 +76,7 @@ type VariableReference =
 
 export interface ConnectedNotify extends JsonRpcNotify {
   method: 'connected'
-  params: { 
+  params: {
     lua?: {
       version?: string
       productName?: string
@@ -84,7 +84,8 @@ export interface ConnectedNotify extends JsonRpcNotify {
       shipping?: boolean
       vmType?: string
     },
-    working_directory?: string
+    working_directory?: string,
+    protocol_version?: string
   }
 }
 
@@ -119,7 +120,33 @@ interface CommandRequest extends JsonRpcRequest {
   params: string
 }
 
-function stringify(value: unknown): string {
+function getStringifiableObject(value: any): any {
+  if (value == null) {
+    return 'nil'
+  } else if (value == undefined) {
+    return 'none'
+  } else if (typeof value === 'string') { // prevent putting quotes around the value
+    return value
+  } else if ((value instanceof Array)) {
+    const newArr: Array<any> = []
+    for (let i = 0; i < value.length; i++){
+      newArr.push(getStringifiableObject(value[i]))
+    }
+    return newArr
+  } else if (typeof value === 'object') {
+    const newObj: any = {}
+    const arrData = value['key']
+    for (let i = 0; i < arrData.length - 1; i += 2){
+      newObj[stringify_v3(arrData[i])] = getStringifiableObject(arrData[i + 1])
+    }
+    return newObj
+  } else {
+    return JSON.stringify(value)
+  }
+}
+
+// protocol_version 2
+function stringify_v2(value: unknown): string {
   if (value == null) {
     return 'nil'
   } else if (value == undefined) {
@@ -131,9 +158,26 @@ function stringify(value: unknown): string {
   }
 }
 
+// protocol_version 3
+function stringify_v3(value: unknown): string {
+  if (value == null) {
+    return 'nil'
+  } else if (value == undefined) {
+    return 'none'
+  } else if (typeof value === 'string') { // prevent putting quotes around the value
+    return value
+  } else if (typeof value === 'object') {
+    return JSON.stringify(getStringifiableObject(value))
+  } else {
+    return JSON.stringify(value)
+  }
+}
+
 export class LuaDebugSession extends DebugSession {
   // Lua
   private static THREAD_ID = 1
+
+  private static DEBUGGER_PROTOCOL_VERSION = '3'
 
   private _debug_server_process?: ChildProcess
 
@@ -151,6 +195,8 @@ export class LuaDebugSession extends DebugSession {
   private _stopOnEntry?: boolean
 
   private _working_directory?: string
+
+  private _debuggee_protocol_version?: string
 
   /**
    * Creates a new debug adapter that is used for one debug session.
@@ -283,6 +329,10 @@ export class LuaDebugSession extends DebugSession {
       })
 
       this._debug_client.onOpen.on(() => {
+        const data = {
+          protocol_version: LuaDebugSession.DEBUGGER_PROTOCOL_VERSION,
+        }
+        this._debug_client?.init(data)
         this.sendEvent(new InitializedEvent())
       })
 
@@ -304,7 +354,7 @@ export class LuaDebugSession extends DebugSession {
         response.message = `Debug Adapter exception: ${e.message}`
       }
       this.sendEvent(new OutputEvent(response.message + "\n"))
-      this.sendResponse(response)      
+      this.sendResponse(response)
     }
   }
 
@@ -336,6 +386,10 @@ export class LuaDebugSession extends DebugSession {
 
       this._debug_client.onOpen.on(() => {
         this.sendEvent(new OutputEvent(`Debugger connected!\n`))
+        const data = {
+          protocol_version: LuaDebugSession.DEBUGGER_PROTOCOL_VERSION,
+        }
+        this._debug_client?.init(data)
         this.sendEvent(new InitializedEvent())
       })
 
@@ -348,7 +402,7 @@ export class LuaDebugSession extends DebugSession {
         response.message = `Debug Adapter exception: ${e.message}`
       }
       this.sendEvent(new OutputEvent(response.message + "\n"))
-      this.sendResponse(response)      
+      this.sendResponse(response)
     }
   }
 
@@ -429,7 +483,7 @@ export class LuaDebugSession extends DebugSession {
         response.message = `Debug Adapter exception: ${e.message}`
       }
       this.sendEvent(new OutputEvent(response.message + "\n"))
-      this.sendResponse(response)      
+      this.sendResponse(response)
     }
   }
 
@@ -503,7 +557,7 @@ export class LuaDebugSession extends DebugSession {
         response.message = `Debug Adapter exception: ${e.message}`
       }
       this.sendEvent(new OutputEvent(response.message + "\n"))
-      this.sendResponse(response)      
+      this.sendResponse(response)
     }
   }
 
@@ -556,7 +610,7 @@ export class LuaDebugSession extends DebugSession {
         response.message = `Debug Adapter exception: ${e.message}`
       }
       this.sendEvent(new OutputEvent(response.message + "\n"))
-      this.sendResponse(response)      
+      this.sendResponse(response)
     }
   }
 
@@ -618,7 +672,7 @@ export class LuaDebugSession extends DebugSession {
         response.message = `Debug Adapter exception: ${e.message}`
       }
       this.sendEvent(new OutputEvent(response.message + "\n"))
-      this.sendResponse(response)      
+      this.sendResponse(response)
     }
   }
 
@@ -628,7 +682,7 @@ export class LuaDebugSession extends DebugSession {
     parent: VariableReference
   ): void {
     try {
-      const evalParam = (k: string | number): EvalParam => {
+      const evalParam = (k: any): EvalParam => {
         switch (parent.type) {
           case 'eval': {
             const key = typeof k === 'string' ? `"${k}"` : `${k}`
@@ -658,30 +712,66 @@ export class LuaDebugSession extends DebugSession {
 
       const variables: DebugProtocol.Variable[] = []
       if (variablesData instanceof Array) {
-        variablesData.forEach((v, i) => {
-          const typename = typeof v
-          const k = i + 1
-          const varRef =
-            typename === 'object' ? this._variableHandles.create(evalParam(k)) : 0
-          variables.push({
-            name: `${k}`,
-            type: typename,
-            value: stringify(v),
-            variablesReference: varRef,
+        if (this._debuggee_protocol_version === '2') {
+          variablesData.forEach((v, i) => {
+            const typename = typeof v
+            const k = i + 1
+            const varRef =
+              typename === 'object' ? this._variableHandles.create(evalParam(k)) : 0
+            variables.push({
+              name: `${k}`,
+              type: typename,
+              value: stringify_v2(v),
+              variablesReference: varRef,
+            })
           })
-        })
-      } else if (typeof variablesData === 'object') {
-        const varData = variablesData as Record<string, any>
-        for (const k in varData) {
-          const typename = typeof varData[k]
-          const varRef =
-            typename === 'object' ? this._variableHandles.create(evalParam(k)) : 0
-          variables.push({
-            name: k,
-            type: typename,
-            value: stringify(varData[k]),
-            variablesReference: varRef,
+        } else {
+          variablesData.forEach((v, i) => {
+            const typename = typeof v
+            const k = i + 1
+            const varRef =
+              typename === 'object' ? this._variableHandles.create(evalParam(k)) : 0
+            variables.push({
+              name: `${k}`,
+              type: typename,
+              value: stringify_v3(v),
+              variablesReference: varRef,
+            })
           })
+        }
+      }
+      else if (typeof variablesData === 'object') {
+        if (this._debuggee_protocol_version === '2') {
+          const varData = variablesData as Record<string, any>
+          for (const k in varData) {
+            const typename = typeof varData[k]
+            const varRef =
+              typename === 'object' ? this._variableHandles.create(evalParam(k)) : 0
+            variables.push({
+              name: k,
+              type: typename,
+              value: stringify_v2(varData[k]),
+              variablesReference: varRef,
+            })
+          }
+        } else {
+          if (variablesData !== null && variablesData !== undefined && 'key' in variablesData) {
+            const arrData = (variablesData as {key: Array<object>}).key
+
+            for (let i = 0; i < arrData.length - 1; i += 2){
+              const key = arrData[i]
+              const val = arrData[i + 1]
+
+              const typename = typeof val
+              const varRef = typename === 'object' ? this._variableHandles.create(evalParam(key)) : 0
+              variables.push({
+                name: `${key}`,
+                type: typename,
+                value: stringify_v3(val),
+                variablesReference: varRef,
+              })
+            }
+          }
         }
       }
 
@@ -698,7 +788,7 @@ export class LuaDebugSession extends DebugSession {
         response.message = `Debug Adapter exception: ${e.message}`
       }
       this.sendEvent(new OutputEvent(response.message + "\n"))
-      this.sendResponse(response)      
+      this.sendResponse(response)
     }
   }
 
@@ -717,7 +807,7 @@ export class LuaDebugSession extends DebugSession {
         response.message = `Debug Adapter exception: ${e.message}`
       }
       this.sendEvent(new OutputEvent(response.message + "\n"))
-      this.sendResponse(response)      
+      this.sendResponse(response)
     }
   }
 
@@ -736,7 +826,7 @@ export class LuaDebugSession extends DebugSession {
         response.message = `Debug Adapter exception: ${e.message}`
       }
       this.sendEvent(new OutputEvent(response.message + "\n"))
-      this.sendResponse(response)      
+      this.sendResponse(response)
     }
   }
 
@@ -755,7 +845,7 @@ export class LuaDebugSession extends DebugSession {
         response.message = `Debug Adapter exception: ${e.message}`
       }
       this.sendEvent(new OutputEvent(response.message + "\n"))
-      this.sendResponse(response)      
+      this.sendResponse(response)
     }
   }
 
@@ -774,7 +864,7 @@ export class LuaDebugSession extends DebugSession {
         response.message = `Debug Adapter exception: ${e.message}`
       }
       this.sendEvent(new OutputEvent(response.message + "\n"))
-      this.sendResponse(response)      
+      this.sendResponse(response)
     }
   }
 
@@ -793,7 +883,7 @@ export class LuaDebugSession extends DebugSession {
         response.message = `Debug Adapter exception: ${e.message}`
       }
       this.sendEvent(new OutputEvent(response.message + "\n"))
-      this.sendResponse(response)      
+      this.sendResponse(response)
     }
   }
 
@@ -818,7 +908,7 @@ export class LuaDebugSession extends DebugSession {
         response.message = `Debug Adapter exception: ${e.message}`
       }
       this.sendEvent(new OutputEvent(response.message + "\n"))
-      this.sendResponse(response)      
+      this.sendResponse(response)
     }
   }
 
@@ -849,7 +939,7 @@ export class LuaDebugSession extends DebugSession {
         response.message = `Debug Adapter exception: ${e.message}`
       }
       this.sendEvent(new OutputEvent(response.message + "\n"))
-      this.sendResponse(response)      
+      this.sendResponse(response)
     }
   }
 
@@ -885,7 +975,12 @@ export class LuaDebugSession extends DebugSession {
       }
       this._debug_client.eval(requestParam).then((res) => {
         if (res.result instanceof Array) {
-          const ret = res.result.map((v) => stringify(v)).join('\t')
+          let ret = ''
+          if (this._debuggee_protocol_version === '2') {
+              ret = res.result.map((v) => stringify_v2(v)).join('\t')
+          } else {
+              ret = res.result.map((v) => stringify_v3(v)).join('\t')
+          }
           let varRef = 0
           if (res.result.length == 1) {
             const refobj = res.result[0]
@@ -921,7 +1016,7 @@ export class LuaDebugSession extends DebugSession {
         response.message = `Debug Adapter exception: ${e.message}`
       }
       this.sendEvent(new OutputEvent(response.message + "\n"))
-      this.sendResponse(response)      
+      this.sendResponse(response)
     }
   }
 
@@ -952,6 +1047,7 @@ export class LuaDebugSession extends DebugSession {
 
         case 'connected':
           this._working_directory = event.params.working_directory
+          this._debuggee_protocol_version = event.params.protocol_version
           break
 
         case 'output':
@@ -1033,7 +1129,7 @@ export class LuaDebugSession extends DebugSession {
         response.message = `Debug Adapter exception: ${e.message}`
       }
       this.sendEvent(new OutputEvent(response.message + "\n"))
-      this.sendResponse(response)      
+      this.sendResponse(response)
     }
   }
 }

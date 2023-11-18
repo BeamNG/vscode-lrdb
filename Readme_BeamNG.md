@@ -9,13 +9,13 @@ This project consists of a c++ part that is compiled with the game and runs with
 # Prerequisites
 
 1) [Install VSCode](https://code.visualstudio.com)
-2) Install the [`LRDB` (Lua Remote Debugger) extension](https://marketplace.visualstudio.com/items?itemName=satoren.lrdb) for VScode
+2) Install the [`LRDB` (Lua Remote Debugger) extension](https://marketplace.visualstudio.com/items?itemName=beamng.lrdb-beamng) for VScode
 
 # Quickstart
 
 1) Open game folder in VScode as workspace: `File` > `Open Folder...` > `<select game folder>`
 2) Place breakpoints in your Lua files. (Highlight a line and press `F9`)
-3) Start the game separatly with the command line arguments
+3) Start the game separately with the command line arguments (case sensitive!)
  `-luadebug -attachOnStart` - The game will hang and wait for VScode to connect.
 4) Press `F5` in VScode (Launch in VScode to attach to the game).
 
