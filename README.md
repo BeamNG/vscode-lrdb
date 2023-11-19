@@ -38,6 +38,15 @@ How to use:
 
 Please see the [developer docs](Readme_dev.md) if you want to work on this
 
+## Changelog
+
+v0.5.4
+- Fixed tables missing keys due to assuming that a Lua table was an "array" like table when it was really a "dictionary" table
+- Integer, boolean, and table type keys are now able to be viewed in "dictionary" like tables (before it was only string keys)
+
+v0.5.3
+- Initial release!
+
 # Credits
 
 Thank you very much to everyone working on this tech in open source team effort! :)
