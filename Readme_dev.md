@@ -12,7 +12,7 @@ This is a quick summary of how all of this is supposed to work together.
   - the extension via [extension.ts](src/extension.ts) that manages the session on the VS Code side
   - the Debug adapter which relays messages from the VS Code frontend to the C++ server backend.
 
-For more information about the VS Code side of things, please read [debugger-extension](https://code.visualstudio.com/api/extension-guides/debugger-extension). 
+For more information about the VS Code side of things, please read [debugger-extension](https://code.visualstudio.com/api/extension-guides/debugger-extension).
 
 
 ## Prerequisites
@@ -36,10 +36,27 @@ const runMode: 'external' | 'server' | 'inline' = 'server'
 Please do not commit this change, it will break in production.
 
 4) On the left side of VS Code, switch to the "Run and Debug" Tab
+
+## Submitting Contribution
+
+### Accepting the Contributor License Agreement
+
+When you create a new pull request, our CLA-bot will prompt you to sign the [BeamNG Contributor License Agreement](https://docs.google.com/forms/d/17eWfaz6Xbn120hnYTaZnhGX1Lzg-LGNaN3VklrjXCyY/viewform?edit_requested=true).
+
+### Submitting Your Contribution
+
+1. Create a fork of the repository.
+2. Modify/add existing code and add tests where appropriate.
+3. Create a pull request. Posting the pull request will trigger a git action requesting you to accept the contribution license agreement.
+
+Congratulations :tada::tada: The BeamNG team thanks you :sparkles:.
+
+Once your PR is merged, your contributions will be publicly visible on the [Contributors page](https://github.com/BeamNG/vscode-lrdb/graphs/contributors).
+
 5) Launch `Extension + Server`. Extension is the frontend, Server is your Debug adapter
 6) In the newly opened VS Code window, try to reproduce the crash or error, your exceptions should be logged.
 
-## Publishing
+## Publishing (only for project maintainers)
 
 1) Please read the [offical guideline](https://code.visualstudio.com/api/working-with-extensions/publishing-extension)
 2) Package it:
