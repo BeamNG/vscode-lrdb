@@ -36,6 +36,8 @@ const runMode: 'external' | 'server' | 'inline' = 'server'
 Please do not commit this change, it will break in production.
 
 4) On the left side of VS Code, switch to the "Run and Debug" Tab
+5) Launch `Extension + Server`. Extension is the frontend, Server is your Debug adapter
+6) In the newly opened VS Code window, try to reproduce the crash or error, your exceptions should be logged.
 
 ## Submitting Contribution
 
@@ -53,10 +55,7 @@ Congratulations :tada::tada: The BeamNG team thanks you :sparkles:.
 
 Once your PR is merged, your contributions will be publicly visible on the [Contributors page](https://github.com/BeamNG/vscode-lrdb/graphs/contributors).
 
-5) Launch `Extension + Server`. Extension is the frontend, Server is your Debug adapter
-6) In the newly opened VS Code window, try to reproduce the crash or error, your exceptions should be logged.
-
-## Publishing (only for project maintainers)
+## Publishing to the Visual Studio Marketplace (only for project maintainers)
 
 1) Please read the [offical guideline](https://code.visualstudio.com/api/working-with-extensions/publishing-extension)
 2) Package it:
