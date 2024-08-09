@@ -39,22 +39,6 @@ Please do not commit this change, it will break in production.
 5) Launch `Extension + Server`. Extension is the frontend, Server is your Debug adapter
 6) In the newly opened VS Code window, try to reproduce the crash or error, your exceptions should be logged.
 
-## Submitting Contribution
-
-### Accepting the Contributor License Agreement
-
-When you create a new pull request, our CLA-bot will prompt you to sign the [BeamNG Contributor License Agreement](https://docs.google.com/forms/d/17eWfaz6Xbn120hnYTaZnhGX1Lzg-LGNaN3VklrjXCyY/viewform?edit_requested=true).
-
-### Submitting Your Contribution
-
-1. Create a fork of the repository.
-2. Modify/add existing code and add tests where appropriate.
-3. Create a pull request. Posting the pull request will trigger a git action requesting you to accept the contribution license agreement.
-
-Congratulations :tada::tada: The BeamNG team thanks you :sparkles:.
-
-Once your PR is merged, your contributions will be publicly visible on the [Contributors page](https://github.com/BeamNG/vscode-lrdb/graphs/contributors).
-
 ## Publishing to the Visual Studio Marketplace (only for project maintainers)
 
 1) Please read the [offical guideline](https://code.visualstudio.com/api/working-with-extensions/publishing-extension)
